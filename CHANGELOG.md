@@ -1,15 +1,13 @@
-# Changelog
+# My Module
 
-## v1.0.0
+## Release 1.0.1 (yyyy-dd-mm)
+- A simple list
+- Of changes
 
-### Added or Changed
-- Added this changelog :)
-- Fixed typos in both templates
-- Back to top links
-- Added more "Built With" frameworks/libraries
-- Changed table of contents to start collapsed
-- Added checkboxes for major features on roadmap
+## Release 1.0.0 (yyyy-dd-mm)
+- A simple list
+- Of changes
 
-### Removed
-
-- Some packages/libraries from acknowledgements I no longer use
+## Pre-Release 0.1.0 (yyyy-dd-mm)
+- A simple list
+- Of changes
