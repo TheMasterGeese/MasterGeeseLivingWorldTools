@@ -9,6 +9,7 @@ const rename = require('gulp-rename');
 const minify = require('gulp-minify');
 const tabify = require('gulp-tabify');
 const stringify = require('json-stringify-pretty-compact');
+const eslint = require('gulp-eslint');
 
 const GLOB = '**/*';
 const DIST = 'dist/';
@@ -26,6 +27,24 @@ String.prototype.replaceAll = function (pattern, replace) { return this.split(pa
 function pdel(patterns, options) { return () => { return del(patterns, options); }; }
 function plog(message) { return (cb) => { console.log(message); cb() }; }
 
+/**
+ * Runs eslint
+ */
+function lint() {
+	return () => {
+		return gulp.src(SOURCE + GLOB)
+			.pipe(eslint(".eslintrc"))
+			.pipe(eslint.failAfterError())
+			.pipe(eslint.result(result => {
+				console.log(`ESLint result: ${result.filePath}`);
+				console.log(`# Messages: ${result.messages.length}`);
+				console.log(`# Warnings: ${result.warningCount}`);
+				console.log(`# Errors: ${result.errorCount}`);
+			}));
+	}
+}
+exports.lint = lint();
+exports.step_lint = lint();
 
 /**
  * Compile the source code into the distribution directory
@@ -113,6 +132,7 @@ exports.devClean = pdel([DEV_DIST()]);
  * Default Build operation
  */
 exports.default = gulp.series(
+	// TODO: Figure out where to put lint in the existing pipelines
 	pdel([DIST])
 	, gulp.parallel(
 		buildSource(true, false)
