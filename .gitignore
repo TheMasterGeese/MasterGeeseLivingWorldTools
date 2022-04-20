@@ -1,3 +1,12 @@
-node_modules/
-dist/
-MasterGeeseLivingWorldTools.code-workspace
+*
+
+!.github
+!.eslintrc
+!CHANGELOG.MD
+!gulpfile.js
+!LICENSE
+!MasterGeeseLivingWorldTools.code-workspace
+!module.json
+!package.json
+!README.MD
+!tsconfig.json
