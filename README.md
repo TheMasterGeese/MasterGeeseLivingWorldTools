@@ -201,3 +201,13 @@ The `gulpfile.js` defines the build scripts that are executed by the NPM command
 The `tsconfig.json` file contains all the options used to configure the TypeScript transpiler. This file contains all of the options, and comments about what those options do. Don't be afraid to read through it and try out some of the options that interest you.
 
 [top](#table-of-contents)
+
+## JM
+
+TODO: This file needs an overhaul, but for now here's how things work now.
+All the linting/gulp tasks are done in this repo, under the assumption that all modules have been cloned in this project directory.
+Run each of the npm scripts like so to run them for a specific module:
+
+npm run lint -- --module=ready-check
+
+the "tag" script has not been attempted yet, and may or may not be broken.
