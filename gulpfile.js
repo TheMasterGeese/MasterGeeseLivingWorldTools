@@ -12,23 +12,23 @@ const tabify = require('gulp-tabify');
 const stringify = require('json-stringify-pretty-compact');
 const eslint = require('gulp-eslint');
 
-const MODULE = `${argv.module}/`
+const MODULE = `${argv.module}`
 const GLOB = '**/*';
-const DIST = MODULE + 'dist/';
-const BUNDLE = MODULE + 'bundle/';
+const DIST = MODULE + '/dist/';
+const BUNDLE = MODULE + '/bundle/';
 const SOURCE = 'src/';
-const MODULE_SOURCE = MODULE + SOURCE;
+const MODULE_SOURCE = MODULE + '/' + SOURCE;
 const LANG = 'lang/';
-const MODULE_LANG = MODULE + LANG;
+const MODULE_LANG = MODULE + '/' + LANG;
 const TEMPLATES = 'templates/';
-const MODULE_TEMPLATES = MODULE + TEMPLATES
+const MODULE_TEMPLATES = MODULE + '/' + TEMPLATES
 const CSS = 'css/';
-const MODULE_CSS = MODULE + CSS;
+const MODULE_CSS = MODULE + '/' + CSS;
 
 
 // JM: Probably no need to change
 var PACKAGE = JSON.parse(fs.readFileSync('package.json'));
-var MODULE_PACKAGE = JSON.parse(fs.readFileSync(MODULE +'package.json'));
+var MODULE_PACKAGE = JSON.parse(fs.readFileSync(MODULE +'/package.json'));
 function reloadPackage(cb) { PACKAGE = JSON.parse(fs.readFileSync('package.json')); cb(); }
 function DEV_DIST() { return path.join(PACKAGE.devDir, MODULE_PACKAGE.name + '/'); }
 
@@ -65,7 +65,7 @@ function buildSource(keepSources, minifySources = false, output = null) {
 	return () => {
 		var stream = gulp.src(MODULE_SOURCE + GLOB);
 		if (keepSources) stream = stream.pipe(sm.init())
-		stream = stream.pipe(ts.createProject(MODULE + "tsconfig.json")())
+		stream = stream.pipe(ts.createProject(MODULE + "/tsconfig.json")())
 		if (keepSources) stream = stream.pipe(sm.write())
 		if (minifySources) stream = stream.pipe(minify({
 			ext: { min: '.js' },
@@ -85,16 +85,16 @@ exports.step_buildSourceMin = buildSource(false, true);
  */
 function buildManifest(output = null) {
 	const files = []; // Collector for all the file paths
-	return (cb) => gulp.src(MODULE + MODULE_PACKAGE.main) // collect the source files
+	return (cb) => gulp.src(MODULE + '/' + MODULE_PACKAGE.main) // collect the source files
 		.pipe(rename({ extname: '.js' })) // rename their extensions to `.js`
 		.pipe(gulp.src(MODULE_CSS + GLOB)) // grab all the CSS files
-		.on('data', file => files.push(path.relative(file.cwd, file.path))) // Collect all the file paths
+		.on('data', file => files.push(path.relative(file.cwd + "\\" + MODULE, file.path))) // Collect all the file paths
 		.on('end', () => { // output the filepaths to the module.json
 			if (files.length == 0)
 				throw Error('No files found in ' + MODULE_SOURCE + GLOB + " or " + MODULE_CSS + GLOB);
 			const js = files.filter(e => e.endsWith('js')); // split the CSS and JS files
 			const css = files.filter(e => e.endsWith('css'));
-			fs.readFile(MODULE + 'module.json', (err, data) => {
+			fs.readFile(MODULE + '/module.json', (err, data) => {
 				const module = data.toString() // Inject the data into the module.json
 					.replaceAll('{{name}}', MODULE_PACKAGE.name)
 					.replaceAll('{{title}}', MODULE_PACKAGE.title)
@@ -111,7 +111,7 @@ exports.step_buildManifest = buildManifest();
 function outputLanguages(output = null) { return () => gulp.src(MODULE_LANG + GLOB).pipe(gulp.dest((output || DIST) + LANG)); }
 function outputTemplates(output = null) { return () => gulp.src(MODULE_TEMPLATES + GLOB).pipe(gulp.dest((output || DIST) + TEMPLATES)); }
 function outputStylesCSS(output = null) { return () => gulp.src(MODULE_CSS + GLOB).pipe(gulp.dest((output || DIST) + CSS)); }
-function outputMetaFiles(output = null) { return () => gulp.src([MODULE + 'LICENSE', MODULE + 'README.md', MODULE + 'CHANGELOG.md']).pipe(gulp.dest((output || DIST))); }
+function outputMetaFiles(output = null) { return () => gulp.src([MODULE + '/LICENSE', MODULE + '/README.md', MODULE + '/CHANGELOG.md']).pipe(gulp.dest((output || DIST))); }
 
 /**
  * Copy files to module named directory and then compress that folder into a zip
@@ -138,7 +138,9 @@ exports.step_compressDistribution = compressDistribution();
  * Simple clean command
  */
 exports.clean = pdel([DIST, BUNDLE]);
-exports.devClean = pdel([DEV_DIST()]);
+exports.devClean = pdel([DEV_DIST()], {
+	"force" : "true"
+});
 /**
  * Default Build operation
  */
@@ -190,11 +192,11 @@ exports.zip = gulp.series(
 exports.watch = function () {
 	exports.default();
 	gulp.watch(MODULE_SOURCE + GLOB, gulp.series(pdel(DIST + SOURCE), buildSource(true, false)));
-	gulp.watch([MODULE_CSS + GLOB, 'module.json', 'package.json'], buildManifest());
+	gulp.watch([MODULE_CSS + GLOB, MODULE + '/module.json', MODULE + '/package.json'], buildManifest());
 	gulp.watch(MODULE_LANG + GLOB, gulp.series(pdel(DIST + LANG), outputLanguages()));
 	gulp.watch(MODULE_TEMPLATES + GLOB, gulp.series(pdel(DIST + TEMPLATES), outputTemplates()));
 	gulp.watch(MODULE_CSS + GLOB, gulp.series(pdel(DIST + CSS), outputStylesCSS()));
-	gulp.watch([MODULE + 'LICENSE', MODULE + 'README.md', MODULE + 'CHANGELOG.md'], outputMetaFiles());
+	gulp.watch([MODULE + '/LICENSE', MODULE + '/README.md', MODULE + '/CHANGELOG.md'], outputMetaFiles());
 }
 /**
  * Sets up a file watch on the project to detect any file changes and automatically rebuild those components, and then copy them to the Development Environment.
@@ -203,9 +205,9 @@ exports.devWatch = function () {
 	const devDist = DEV_DIST();
 	exports.dev();
 	gulp.watch(MODULE_SOURCE + GLOB, gulp.series(plog('deleting: ' + devDist + SOURCE + GLOB), pdel(devDist + SOURCE + GLOB, { force: true }), buildSource(true, false, devDist), plog('sources done.')));
-	gulp.watch([MODULE_CSS + GLOB, 'module.json', 'package.json'], gulp.series(reloadPackage, buildManifest(devDist), plog('manifest done.')));
+	gulp.watch([MODULE_CSS + GLOB, MODULE + '/module.json', MODULE + '/package.json'], gulp.series(reloadPackage, buildManifest(devDist), plog('manifest done.')));
 	gulp.watch(MODULE_LANG + GLOB, gulp.series(pdel(devDist + LANG + GLOB, { force: true }), outputLanguages(devDist), plog('langs done.')));
 	gulp.watch(MODULE_TEMPLATES + GLOB, gulp.series(pdel(devDist + TEMPLATES + GLOB, { force: true }), outputTemplates(devDist), plog('templates done.')));
 	gulp.watch(MODULE_CSS + GLOB, gulp.series(pdel(devDist + CSS + GLOB, { force: true }), outputStylesCSS(devDist), plog('css done.')));
-	gulp.watch([MODULE + 'LICENSE', MODULE +'README.md', MODULE + 'CHANGELOG.md'], gulp.series(outputMetaFiles(devDist), plog('metas done.')));
+	gulp.watch([MODULE + '/LICENSE', MODULE +'/README.md', MODULE + '/CHANGELOG.md'], gulp.series(outputMetaFiles(devDist), plog('metas done.')));
 }
