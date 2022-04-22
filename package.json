@@ -6,6 +6,7 @@
 	"devDir": "C:/Users/Jon/foundrydata/Data/modules",
 	"main": "src/index.ts",
 	"scripts": {
+		"start": "node C:/Users/Jon/FoundryVTT-9.255/resources/app/main.js --dataPath=C:/Users/Jon/foundryData",
 		"build": "npx gulp",
 		"lint": "npx gulp lint",
 		"watch": "npx gulp watch",
