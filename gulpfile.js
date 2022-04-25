@@ -88,7 +88,7 @@ function buildManifest(output = null) {
 	return (cb) => gulp.src(MODULE + '/' + MODULE_PACKAGE.main) // collect the source files
 		.pipe(rename({ extname: '.js' })) // rename their extensions to `.js`
 		.pipe(gulp.src(MODULE_CSS + GLOB)) // grab all the CSS files
-		.on('data', file => files.push(path.relative(file.cwd + "\\" + MODULE, file.path))) // Collect all the file paths
+		.on('data', file => files.push(path.relative(file.cwd + "/" + MODULE, file.path))) // Collect all the file paths
 		.on('end', () => { // output the filepaths to the module.json
 			if (files.length == 0)
 				throw Error('No files found in ' + MODULE_SOURCE + GLOB + " or " + MODULE_CSS + GLOB);
