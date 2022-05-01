@@ -100,8 +100,8 @@ function buildManifest(output = null) {
 					.replaceAll('{{title}}', MODULE_PACKAGE.title)
 					.replaceAll('{{version}}', MODULE_PACKAGE.version)
 					.replaceAll('{{description}}', MODULE_PACKAGE.description)
-					.replace('"{{sources}}"', stringify(js, null, '\t').replaceAll('\n', '\n\t'))
-					.replace('"{{css}}"', stringify(css, null, '\t').replaceAll('\n', '\n\t'));
+					.replace('"{{sources}}"', stringify(js, null, '\t').replaceAll('\n', '\n\t').replaceAll('\\\\', '/'))
+					.replace('"{{css}}"', stringify(css, null, '\t').replaceAll('\n', '\n\t').replaceAll('\\\\', '/'));
 				fs.writeFile((output || DIST) + 'module.json', module, cb); // save the module to the distribution directory
 			});
 		});
@@ -126,7 +126,7 @@ function compressDistribution() {
 			.pipe(zip(MODULE_PACKAGE.name + '.zip'))
 			.pipe(gulp.dest(BUNDLE))
 		// Copy the module.json to the bundle directory
-		, () => gulp.src(DIST + '/module.json')
+		, () => gulp.src(DIST + 'module.json')
 			.pipe(gulp.dest(BUNDLE))
 		// Cleanup by deleting the intermediate module named folder
 		, pdel(DIST + MODULE_PACKAGE.name)
