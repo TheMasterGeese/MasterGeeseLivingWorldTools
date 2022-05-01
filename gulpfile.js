@@ -24,6 +24,8 @@ const TEMPLATES = 'templates/';
 const MODULE_TEMPLATES = MODULE + '/' + TEMPLATES
 const CSS = 'css/';
 const MODULE_CSS = MODULE + '/' + CSS;
+const SOUNDS = 'sounds/';
+const MODULE_SOUNDS = MODULE + '/' + SOUNDS;
 
 
 // JM: Probably no need to change
@@ -111,6 +113,7 @@ exports.step_buildManifest = buildManifest();
 function outputLanguages(output = null) { return () => gulp.src(MODULE_LANG + GLOB).pipe(gulp.dest((output || DIST) + LANG)); }
 function outputTemplates(output = null) { return () => gulp.src(MODULE_TEMPLATES + GLOB).pipe(gulp.dest((output || DIST) + TEMPLATES)); }
 function outputStylesCSS(output = null) { return () => gulp.src(MODULE_CSS + GLOB).pipe(gulp.dest((output || DIST) + CSS)); }
+function outputSounds(output = null) { return () => gulp.src(MODULE_SOUNDS + GLOB).pipe(gulp.dest((output || DIST) + SOUNDS)); }
 function outputMetaFiles(output = null) { return () => gulp.src([MODULE + '/LICENSE', MODULE + '/README.md', MODULE + '/CHANGELOG.md']).pipe(gulp.dest((output || DIST))); }
 
 /**
@@ -153,6 +156,7 @@ exports.default = gulp.series(
 		, outputLanguages()
 		, outputTemplates()
 		, outputStylesCSS()
+		, outputSounds()
 		, outputMetaFiles()
 	)
 );
@@ -167,6 +171,7 @@ exports.dev = gulp.series(
 		, outputLanguages(DEV_DIST())
 		, outputTemplates(DEV_DIST())
 		, outputStylesCSS(DEV_DIST())
+		, outputSounds(DEV_DIST())
 		, outputMetaFiles(DEV_DIST())
 	)
 );
@@ -181,6 +186,7 @@ exports.zip = gulp.series(
 		, outputLanguages()
 		, outputTemplates()
 		, outputStylesCSS()
+		, outputSounds()
 		, outputMetaFiles()
 	)
 	, compressDistribution()
@@ -196,6 +202,7 @@ exports.watch = function () {
 	gulp.watch(MODULE_LANG + GLOB, gulp.series(pdel(DIST + LANG), outputLanguages()));
 	gulp.watch(MODULE_TEMPLATES + GLOB, gulp.series(pdel(DIST + TEMPLATES), outputTemplates()));
 	gulp.watch(MODULE_CSS + GLOB, gulp.series(pdel(DIST + CSS), outputStylesCSS()));
+	gulp.watch(MODULE_SOUNDS + GLOB, gulp.series(pdel(DIST + SOUNDS), outputSounds()));
 	gulp.watch([MODULE + '/LICENSE', MODULE + '/README.md', MODULE + '/CHANGELOG.md'], outputMetaFiles());
 }
 /**
@@ -209,5 +216,6 @@ exports.devWatch = function () {
 	gulp.watch(MODULE_LANG + GLOB, gulp.series(pdel(devDist + LANG + GLOB, { force: true }), outputLanguages(devDist), plog('langs done.')));
 	gulp.watch(MODULE_TEMPLATES + GLOB, gulp.series(pdel(devDist + TEMPLATES + GLOB, { force: true }), outputTemplates(devDist), plog('templates done.')));
 	gulp.watch(MODULE_CSS + GLOB, gulp.series(pdel(devDist + CSS + GLOB, { force: true }), outputStylesCSS(devDist), plog('css done.')));
+	gulp.watch(MODULE_SOUNDS + GLOB, gulp.series(pdel(devDist + SOUNDS + GLOB, { force: true }), outputSounds(devDist), plog('sounds done.')));
 	gulp.watch([MODULE + '/LICENSE', MODULE +'/README.md', MODULE + '/CHANGELOG.md'], gulp.series(outputMetaFiles(devDist), plog('metas done.')));
 }
