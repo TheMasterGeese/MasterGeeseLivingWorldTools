@@ -148,7 +148,7 @@ exports.devClean = pdel([DEV_DIST()], {
  * Default Build operation
  */
 exports.default = gulp.series(
-	// TODO: Figure out where to put lint in the existing pipelines
+	lint(), 
 	pdel([DIST])
 	, gulp.parallel(
 		buildSource(true, false)
@@ -164,6 +164,7 @@ exports.default = gulp.series(
  * Extends the default build task by copying the result to the Development Environment
  */
 exports.dev = gulp.series(
+	lint(),
 	pdel([DEV_DIST() + GLOB], { force: true }),
 	gulp.parallel(
 		buildSource(true, false, DEV_DIST())
@@ -179,6 +180,7 @@ exports.dev = gulp.series(
  * Performs a default build and then zips the result into a bundle
  */
 exports.zip = gulp.series(
+	lint(),
 	pdel([DIST])
 	, gulp.parallel(
 		buildSource(false, false)
