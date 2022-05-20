@@ -38,8 +38,6 @@ String.prototype.replaceAll = function (pattern, replace) { return this.split(pa
 function pdel(patterns, options) { return () => { return del(patterns, options); }; }
 function plog(message) { return (cb) => { console.log(message); cb() }; }
 
-
-
 /**
  * Runs eslint
  */
