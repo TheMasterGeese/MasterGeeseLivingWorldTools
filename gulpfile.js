@@ -11,6 +11,8 @@ const minify = require('gulp-minify');
 const tabify = require('gulp-tabify');
 const stringify = require('json-stringify-pretty-compact');
 const eslint = require('gulp-eslint');
+const exec = require('child_process').exec;
+const cb = require('cb');
 
 const MODULE = `${argv.module}`
 const GLOB = '**/*';
@@ -57,6 +59,21 @@ function lint() {
 exports.lint = lint();
 exports.step_lint = lint();
 
+/**
+ * Runs Tests via playwright
+ */
+ function test() {
+	return () => {
+		return exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {
+			console.log(stdout);
+			console.log(stderr);
+			cb(err);
+		});
+
+	}
+}
+exports.test = test();
+exports.step_test = test();
 /**
  * Compile the source code into the distribution directory
  * @param {Boolean} keepSources Include the TypeScript SourceMaps
