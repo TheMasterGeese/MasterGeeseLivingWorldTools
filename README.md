@@ -18,8 +18,8 @@ In this system, you perform minimal changes to the `module.json` as it is popula
 Clone the repository
 
 ```
-     HTTPS: git clone https://github.com/flamewave000/fvtt-module-template.git
-       SSH: git clone git@github.com:flamewave000/fvtt-module-template.git
+HTTPS: git clone https://github.com/flamewave000/fvtt-module-template.git
+SSH: git clone git@github.com:flamewave000/fvtt-module-template.git
 GitHub CLI: gh repo clone flamewave000/fvtt-module-template
 ```
 
