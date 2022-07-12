@@ -25,6 +25,7 @@
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^9.255.3",
     "@playwright/test": "^1.23.2",
+    "@types/gulp": "^4.0.9",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
     "@typhonjs-fvtt/eslint-config-foundry.js": "^0.8.0",
@@ -35,6 +36,7 @@
     "gulp": "^4.0.2",
     "gulp-cli": "^2.3.0",
     "gulp-eslint": "^6.0.0",
+    "gulp-if": "^3.0.0",
     "gulp-minify": "^3.1.0",
     "gulp-multi-dest": "^0.0.3",
     "gulp-rename": "^2.0.0",
