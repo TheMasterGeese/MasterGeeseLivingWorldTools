@@ -11,6 +11,9 @@ const minify = require('gulp-minify');
 const tabify = require('gulp-tabify');
 const stringify = require('json-stringify-pretty-compact');
 const eslint = require('gulp-eslint');
+const gulpIf = require('gulp-if');
+const exec = require('child_process').exec;
+const cb = require('cb');
 
 const MODULE = `${argv.module}`
 const GLOB = '**/*';
@@ -38,6 +41,10 @@ String.prototype.replaceAll = function (pattern, replace) { return this.split(pa
 function pdel(patterns, options) { return () => { return del(patterns, options); }; }
 function plog(message) { return (cb) => { console.log(message); cb() }; }
 
+function isFixed(file) {
+	return file.eslint != null && file.eslint.fixed;
+}
+
 /**
  * Runs eslint
  */
@@ -45,18 +52,30 @@ function lint() {
 	return () => {
 		return gulp.src(MODULE_SOURCE + GLOB)
 			.pipe(eslint(".eslintrc"))
-			.pipe(eslint.failAfterError())
-			.pipe(eslint.result(result => {
-				console.log(`ESLint result: ${result.filePath}`);
-				console.log(`# Messages: ${result.messages.length}`);
-				console.log(`# Warnings: ${result.warningCount}`);
-				console.log(`# Errors: ${result.errorCount}`);
-			}));
+			.pipe(eslint({fix: true}))
+			.pipe(eslint.format())
+			.pipe(gulpIf(isFixed, gulp.dest(MODULE_SOURCE)))
+			.pipe(eslint.failAfterError());	
 	}
 }
 exports.lint = lint();
 exports.step_lint = lint();
 
+/**
+ * Runs Tests via playwright
+ */
+ function test() {
+	return () => {
+		return exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {
+			console.log(stdout);
+			console.log(stderr);
+			cb(err);
+		});
+
+	}
+}
+exports.test = test();
+exports.step_test = test();
 /**
  * Compile the source code into the distribution directory
  * @param {Boolean} keepSources Include the TypeScript SourceMaps
