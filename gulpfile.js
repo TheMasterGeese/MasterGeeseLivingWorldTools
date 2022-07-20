@@ -12,7 +12,7 @@ const tabify = require('gulp-tabify');
 const stringify = require('json-stringify-pretty-compact');
 const eslint = require('gulp-eslint');
 const gulpIf = require('gulp-if');
-const exec = require('child_process').exec;
+const {spawn, exec} = require('child_process');
 const cb = require('cb');
 
 const MODULE = `${argv.module}`
@@ -64,14 +64,28 @@ exports.step_lint = lint();
 /**
  * Runs Tests via playwright
  */
- function test() {
+function test() {
 	return () => {
-		return exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {
+		// spawn a process that starts up foundry
+		// TODO: Need to await it finishing startup, or to check for it later before executing tests.
+		const foundry = spawn('node', [ 'C:/Users/Jon/FoundryVTT-9.255/resources/app/main.js', 'C:/Users/Jon/foundryData'], { detached: true } );
+		return new Promise(resolve => {
+			exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {	
+				console.log(stdout);
+				console.log(stderr);
+				cb(err);
+				resolve(true);
+			});
+		}).then(() => foundry.kill());
+
+		/*
+		return exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {	
 			console.log(stdout);
 			console.log(stderr);
 			cb(err);
+			foundry.kill();
 		});
-
+		*/
 	}
 }
 exports.test = test();
