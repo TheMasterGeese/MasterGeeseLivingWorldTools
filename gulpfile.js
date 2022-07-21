@@ -14,6 +14,7 @@ const eslint = require('gulp-eslint');
 const gulpIf = require('gulp-if');
 const {spawn, exec} = require('child_process');
 const cb = require('cb');
+require('dotenv').config();
 
 const MODULE = `${argv.module}`
 const GLOB = '**/*';
@@ -35,7 +36,7 @@ const MODULE_SOUNDS = MODULE + '/' + SOUNDS;
 var PACKAGE = JSON.parse(fs.readFileSync('package.json'));
 var MODULE_PACKAGE = JSON.parse(fs.readFileSync(MODULE +'/package.json'));
 function reloadPackage(cb) { PACKAGE = JSON.parse(fs.readFileSync('package.json')); cb(); }
-function DEV_DIST() { return path.join(PACKAGE.devDir, MODULE_PACKAGE.name + '/'); }
+function DEV_DIST() { return path.join(process.env.LOCAL_DEV_DIR, MODULE_PACKAGE.name + '/'); }
 
 String.prototype.replaceAll = function (pattern, replace) { return this.split(pattern).join(replace); }
 function pdel(patterns, options) { return () => { return del(patterns, options); }; }
