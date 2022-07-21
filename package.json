@@ -11,7 +11,7 @@
     "watchReadyCheck": "npm run devwatch -- --module=mg-ready-check",
     "watchBlockInitiative": "npm run devwatch -- --module=mg-block-initiative",
     "testCore": "npm run test -- --module=mg-living-world-core",
-    "startFoundry": "node C:/Users/Jon/FoundryVTT-9.255/resources/app/main.js --dataPath=C:/Users/Jon/foundryData",
+    "startFoundry": "node C:/Users/Jon/FoundryVTT-9.255/resources/app/main.js --dataPath=$LOCAL_DATA",
     "test": "npx gulp test",
     "build": "npx gulp",
     "lint": "npx gulp lint",
