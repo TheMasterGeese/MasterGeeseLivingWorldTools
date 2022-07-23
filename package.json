@@ -13,7 +13,7 @@
     "start": "npx gulp start",
     "cleanAll": "npx gulp cleanAll",
     "test": "npx gulp test",
-    "build": "npx gulp",
+    "build": "npx gulp -- --module=mg-living-world-core",
     "lint": "npx gulp lint",
     "watch": "npx gulp watch",
     "clean": "npx gulp clean",

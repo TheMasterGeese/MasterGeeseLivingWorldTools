@@ -1,6 +1,7 @@
 *
 
 !.github
+!.github/*
 !.eslintrc
 !CHANGELOG.MD
 !gulpfile.js
