@@ -33,6 +33,76 @@ function reloadPackage(cb) { PACKAGE = JSON.parse(fs.readFileSync('package.json'
 function DEV_DIST() { return path.join(process.env.LOCAL_DEV_DIR, PACKAGE.name + '/'); }
 function pdel(patterns, options) { return () => { return del(patterns, options); }; }
 function plog(message) { return (cb) => { console.log(message); cb() }; }
+
+function isFixed(file) {
+	return file.eslint != null && file.eslint.fixed;
+}
+
+/**
+ * Starts FoundryVTT locally in a docker container.
+ */
+function start() {
+	return () => {
+		return new Promise(resolve => {
+			exec(`docker-compose up -d`, function (err, stdout, stderr) {
+				console.log(stdout);
+				console.log(stderr);
+				cb(err);
+				resolve(true);
+			});
+		});
+	}
+}
+exports.start = start();
+
+/**
+ * Runs eslint
+ */
+function lint() {
+	return () => {
+		return gulp.src(MODULE_SOURCE + GLOB)
+			.pipe(eslint(".eslintrc"))
+			.pipe(eslint({ fix: true }))
+			.pipe(eslint.format())
+			.pipe(gulpIf(isFixed, gulp.dest(MODULE_SOURCE)))
+			.pipe(eslint.failAfterError());
+	}
+}
+exports.lint = lint();
+exports.step_lint = lint();
+
+/**
+ * Runs Tests via playwright
+ */
+function test() {
+	return async () => {
+		// spawn a process that starts up foundry
+		const foundryUp = spawn('docker-compose', ['up'], { detached: true });
+		//const foundry = spawn('node', [ 'C:/Users/Jon/FoundryVTT-9.255/resources/app/main.js', 'C:/Users/Jon/foundryData'], { detached: true } );
+		return new Promise(resolve => {
+			exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {
+				console.log(stdout);
+				console.log(stderr);
+				cb(err);
+				resolve(true);
+			});
+		}).finally(() => {
+			foundryUp.kill()
+			spawn('docker-compose', ['down'], { detached: true });
+		});
+
+		/*
+		return exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {	
+			console.log(stdout);
+			console.log(stderr);
+			cb(err);
+			foundry.kill();
+		});
+		*/
+	}
+}
+exports.test = test();
+exports.step_test = test();
 /**
  * Compile the source code into the distribution directory
  * @param {Boolean} keepSources Include the TypeScript SourceMaps
@@ -193,10 +263,8 @@ exports.cleanAll = cleanAll();
  * Default Build operation
  */
 exports.default = gulp.series(
-	lint(),
-	cleanAll(),
-	test(),
-	pdel([DIST])
+	lint()
+	, cleanAll()	
 	, gulp.parallel(
 		buildSource(true, false)
 		, buildManifest()
@@ -206,15 +274,16 @@ exports.default = gulp.series(
 		, outputSounds()
 		, outputMetaFiles()
 	)
+	, test()
 );
 
 /**
  * Extends the default build task by copying the result to the Development Environment
  */
 exports.dev = gulp.series(
-	lint(),
-	pdel([DEV_DIST() + GLOB], { force: true }),
-	gulp.parallel(
+	lint()
+	, pdel([DEV_DIST() + GLOB], { force: true })
+	, gulp.parallel(
 		buildSource(true, false, DEV_DIST())
 		, buildManifest(DEV_DIST())
 		, outputLanguages(DEV_DIST())
@@ -229,10 +298,8 @@ exports.dev = gulp.series(
  * Performs a default build and then zips the result into a bundle
  */
 exports.zip = gulp.series(
-	lint(),
-	cleanAll(),
-	test(),
-	pdel([DIST])
+	lint()
+	, cleanAll()
 	, gulp.parallel(
 		buildSource(false, false)
 		, buildManifest()
@@ -242,6 +309,7 @@ exports.zip = gulp.series(
 		, outputSounds()
 		, outputMetaFiles()
 	)
+	, test()
 	, compressDistribution()
 	, pdel([DIST])
 );

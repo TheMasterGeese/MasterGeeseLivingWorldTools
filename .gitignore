@@ -15,4 +15,6 @@
 !dist/*
 !docker-compose.yml
 !playwright.config.ts
+!types
+!types/**/*
 
