@@ -1,7 +1,8 @@
-﻿name: Module CI/CD
+﻿name: Branch Validation
 
 on: 
-  push:
+  branch_protection_rule:
+    types: []
     branches:
       - master
 
