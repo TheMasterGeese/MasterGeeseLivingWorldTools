@@ -83,9 +83,9 @@ exports.step_lint = lint();
  * Runs Tests via playwright
  */
 function test() {
-	return () => {
+	return async () => {
 		// spawn a process that starts up foundry
-		const foundry = spawn('docker-compose', ['up'], { detached: true });
+		const foundryUp = spawn('docker-compose', ['up'], { detached: true });
 		//const foundry = spawn('node', [ 'C:/Users/Jon/FoundryVTT-9.255/resources/app/main.js', 'C:/Users/Jon/foundryData'], { detached: true } );
 		return new Promise(resolve => {
 			exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {
@@ -94,8 +94,9 @@ function test() {
 				cb(err);
 				resolve(true);
 			});
-		}).then(() => {
-			foundry.kill()
+		}).finally(() => {
+			foundryUp.kill()
+			spawn('docker-compose', ['down'], { detached: true });
 		});
 
 		/*
@@ -211,10 +212,8 @@ exports.cleanAll = cleanAll();
  * Default Build operation
  */
 exports.default = gulp.series(
-	lint(),
-	cleanAll(),
-	test(),
-	pdel([DIST])
+	lint()
+	, cleanAll()	
 	, gulp.parallel(
 		buildSource(true, false)
 		, buildManifest()
@@ -224,14 +223,15 @@ exports.default = gulp.series(
 		, outputSounds()
 		, outputMetaFiles()
 	)
+	, test()
 );
 /**
  * Extends the default build task by copying the result to the Development Environment
  */
 exports.dev = gulp.series(
-	lint(),
-	pdel([DEV_DIST() + GLOB], { force: true }),
-	gulp.parallel(
+	lint()
+	, pdel([DEV_DIST() + GLOB], { force: true })
+	, gulp.parallel(
 		buildSource(true, false, DEV_DIST())
 		, buildManifest(DEV_DIST())
 		, outputLanguages(DEV_DIST())
@@ -245,10 +245,8 @@ exports.dev = gulp.series(
  * Performs a default build and then zips the result into a bundle
  */
 exports.zip = gulp.series(
-	lint(),
-	cleanAll(),
-	test(),
-	pdel([DIST])
+	lint()
+	, cleanAll()
 	, gulp.parallel(
 		buildSource(false, false)
 		, buildManifest()
@@ -258,6 +256,7 @@ exports.zip = gulp.series(
 		, outputSounds()
 		, outputMetaFiles()
 	)
+	, test()
 	, compressDistribution()
 	, pdel([DIST])
 );
