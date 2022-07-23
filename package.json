@@ -11,6 +11,8 @@
     "watchBlockInitiative": "npm run devwatch -- --module=mg-block-initiative",
     "testCore": "npm run test -- --module=mg-living-world-core",
     "startFoundry": "node C:/Users/Jon/FoundryVTT-9.255/resources/app/main.js --dataPath=${LOCAL_DATA}",
+    "startFoundryDocker": "docker compose up",
+    "cleanAll": "npx gulp cleanAll",
     "test": "npx gulp test",
     "build": "npx gulp",
     "lint": "npx gulp lint",
@@ -19,6 +21,7 @@
     "devbuild": "npx gulp dev",
     "devwatch": "npx gulp devWatch",
     "devclean": "npx gulp devClean",
+    "devtest": "npx gulp test",
     "release": "npx gulp zip"
   },
   "devDependencies": {
@@ -30,7 +33,7 @@
     "@typhonjs-fvtt/eslint-config-foundry.js": "^0.8.0",
     "cb": "^0.1.0",
     "child-process": "^1.0.2",
-    "del": "^6.0.0",
+    "del": "^6.1.1",
     "dotenv": "^16.0.1",
     "eslint": "^8.12.0",
     "gulp": "^4.0.2",
