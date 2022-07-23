@@ -1,124 +1,47 @@
-var argv = require('yargs').argv;
-const gulp = require('gulp');
-const path = require('path');
-var fs = require('fs')
-const del = require('del');
-const ts = require('gulp-typescript');
-const sm = require('gulp-sourcemaps');
-const zip = require('gulp-zip');
-const rename = require('gulp-rename');
-const minify = require('gulp-minify');
-const tabify = require('gulp-tabify');
-const stringify = require('json-stringify-pretty-compact');
-const eslint = require('gulp-eslint');
-const gulpIf = require('gulp-if');
-const { spawn, exec } = require('child_process');
 const cb = require('cb');
+const del = require('del');
 require('dotenv').config();
+const eslint = require('gulp-eslint');
+var fs = require('fs')
+const gulp = require('gulp');
+const gulpIf = require('gulp-if');
+const minify = require('gulp-minify');
+const path = require('path');
+const rename = require('gulp-rename');
+const sm = require('gulp-sourcemaps');
+const stringify = require('json-stringify-pretty-compact');
+const tabify = require('gulp-tabify')
+const ts = require('gulp-typescript');
+const util = require('util');
+const zip = require('gulp-zip');
 
-const MODULE = argv.module ? `${argv.module}` : '.';
+const exec = util.promisify(require('child_process').exec);
+
 const GLOB = '**/*';
-const DIST = MODULE + '/dist/';
-const BUNDLE = MODULE + '/bundle/';
+const DIST = 'dist/';
+const BUNDLE = 'bundle/';
 const SOURCE = 'src/';
-const MODULE_SOURCE = MODULE + '/' + SOURCE;
 const LANG = 'lang/';
-const MODULE_LANG = MODULE + '/' + LANG;
 const TEMPLATES = 'templates/';
-const MODULE_TEMPLATES = MODULE + '/' + TEMPLATES
 const CSS = 'css/';
-const MODULE_CSS = MODULE + '/' + CSS;
 const SOUNDS = 'sounds/';
-const MODULE_SOUNDS = MODULE + '/' + SOUNDS;
 
-
-// JM Probably no need to change
+// declare variables and utility functions
 var PACKAGE = JSON.parse(fs.readFileSync('package.json'));
-var MODULE_PACKAGE = JSON.parse(fs.readFileSync(MODULE + '/package.json'));
-function reloadPackage(cb) { PACKAGE = JSON.parse(fs.readFileSync('package.json')); cb(); }
-function DEV_DIST() { return path.join(process.env.LOCAL_DEV_DIR, MODULE_PACKAGE.name + '/'); }
-
 String.prototype.replaceAll = function (pattern, replace) { return this.split(pattern).join(replace); }
+function reloadPackage(cb) { PACKAGE = JSON.parse(fs.readFileSync('package.json')); cb(); }
+function DEV_DIST() { return path.join(process.env.LOCAL_DEV_DIR, PACKAGE.name + '/'); }
 function pdel(patterns, options) { return () => { return del(patterns, options); }; }
 function plog(message) { return (cb) => { console.log(message); cb() }; }
-
-function isFixed(file) {
-	return file.eslint != null && file.eslint.fixed;
-}
-
-/**
- * Starts FoundryVTT locally in a docker container.
- */
-function start() {
-	return () => {
-		return new Promise(resolve => {
-			exec(`docker-compose up -d`, function (err, stdout, stderr) {
-				console.log(stdout);
-				console.log(stderr);
-				cb(err);
-				resolve(true);
-			});
-		});
-	}
-}
-exports.start = start();
-
-/**
- * Runs eslint
- */
-function lint() {
-	return () => {
-		return gulp.src(MODULE_SOURCE + GLOB)
-			.pipe(eslint(".eslintrc"))
-			.pipe(eslint({ fix: true }))
-			.pipe(eslint.format())
-			.pipe(gulpIf(isFixed, gulp.dest(MODULE_SOURCE)))
-			.pipe(eslint.failAfterError());
-	}
-}
-exports.lint = lint();
-exports.step_lint = lint();
-
-/**
- * Runs Tests via playwright
- */
-function test() {
-	return () => {
-		// spawn a process that starts up foundry
-		const foundry = spawn('docker-compose', ['up'], { detached: true });
-		//const foundry = spawn('node', [ 'C:/Users/Jon/FoundryVTT-9.255/resources/app/main.js', 'C:/Users/Jon/foundryData'], { detached: true } );
-		return new Promise(resolve => {
-			exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {
-				console.log(stdout);
-				console.log(stderr);
-				cb(err);
-				resolve(true);
-			});
-		}).then(() => {
-			foundry.kill()
-		});
-
-		/*
-		return exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {	
-			console.log(stdout);
-			console.log(stderr);
-			cb(err);
-			foundry.kill();
-		});
-		*/
-	}
-}
-exports.test = test();
-exports.step_test = test();
 /**
  * Compile the source code into the distribution directory
  * @param {Boolean} keepSources Include the TypeScript SourceMaps
  */
 function buildSource(keepSources, minifySources = false, output = null) {
 	return () => {
-		var stream = gulp.src(MODULE_SOURCE + GLOB);
+		var stream = gulp.src(SOURCE + GLOB);
 		if (keepSources) stream = stream.pipe(sm.init())
-		stream = stream.pipe(ts.createProject(MODULE + "/tsconfig.json")())
+		stream = stream.pipe(ts.createProject("tsconfig.json")())
 		if (keepSources) stream = stream.pipe(sm.write())
 		if (minifySources) stream = stream.pipe(minify({
 			ext: { min: '.js' },
@@ -129,43 +52,40 @@ function buildSource(keepSources, minifySources = false, output = null) {
 		return stream.pipe(gulp.dest((output || DIST) + SOURCE));
 	}
 }
-exports.step_buildSourceDev = buildSource(true);
-exports.step_buildSource = buildSource(false);
-exports.step_buildSourceMin = buildSource(false, true);
 
 /**
  * Builds the module manifest based on the package, sources, and css.
  */
 function buildManifest(output = null) {
 	const files = []; // Collector for all the file paths
-	return (cb) => gulp.src(MODULE + '/' + MODULE_PACKAGE.main) // collect the source files
+	return (cb) => gulp.src(PACKAGE.main) // collect the source files
 		.pipe(rename({ extname: '.js' })) // rename their extensions to `.js`
-		.pipe(gulp.src(MODULE_CSS + GLOB)) // grab all the CSS files
-		.on('data', file => files.push(path.relative(file.cwd + "/" + MODULE, file.path))) // Collect all the file paths
+		.pipe(gulp.src(CSS + GLOB)) // grab all the CSS files
+		.on('data', file => files.push(path.relative(file.cwd, file.path))) // Collect all the file paths
 		.on('end', () => { // output the filepaths to the module.json
 			if (files.length == 0)
-				throw Error('No files found in ' + MODULE_SOURCE + GLOB + " or " + MODULE_CSS + GLOB);
+				throw Error('No files found in ' + SOURCE + GLOB + " or " + CSS + GLOB);
 			const js = files.filter(e => e.endsWith('js')); // split the CSS and JS files
 			const css = files.filter(e => e.endsWith('css'));
-			fs.readFile(MODULE + '/module.json', (err, data) => {
+			fs.readFile('module.json', (err, data) => {
 				const module = data.toString() // Inject the data into the module.json
-					.replaceAll('{{name}}', MODULE_PACKAGE.name)
-					.replaceAll('{{title}}', MODULE_PACKAGE.title)
-					.replaceAll('{{version}}', MODULE_PACKAGE.version)
-					.replaceAll('{{description}}', MODULE_PACKAGE.description)
+					.replaceAll('{{name}}', PACKAGE.name)
+					.replaceAll('{{title}}', PACKAGE.title)
+					.replaceAll('{{version}}', PACKAGE.version)
+					.replaceAll('{{description}}', PACKAGE.description)
 					.replace('"{{sources}}"', stringify(js, null, '\t').replaceAll('\n', '\n\t').replaceAll('\\\\', '/'))
 					.replace('"{{css}}"', stringify(css, null, '\t').replaceAll('\n', '\n\t').replaceAll('\\\\', '/'));
 				fs.writeFile((output || DIST) + 'module.json', module, cb); // save the module to the distribution directory
 			});
 		});
 }
-exports.step_buildManifest = buildManifest();
 
-function outputLanguages(output = null) { return () => gulp.src(MODULE_LANG + GLOB).pipe(gulp.dest((output || DIST) + LANG)); }
-function outputTemplates(output = null) { return () => gulp.src(MODULE_TEMPLATES + GLOB).pipe(gulp.dest((output || DIST) + TEMPLATES)); }
-function outputStylesCSS(output = null) { return () => gulp.src(MODULE_CSS + GLOB).pipe(gulp.dest((output || DIST) + CSS)); }
-function outputSounds(output = null) { return () => gulp.src(MODULE_SOUNDS + GLOB).pipe(gulp.dest((output || DIST) + SOUNDS)); }
-function outputMetaFiles(output = null) { return () => gulp.src([MODULE + '/LICENSE', MODULE + '/README.md', MODULE + '/CHANGELOG.md']).pipe(gulp.dest((output || DIST))); }
+// copies the corresponding files to the output location passed in, or the DIST folder if none is given.
+function outputLanguages(output = null) { return () => gulp.src(LANG + GLOB).pipe(gulp.dest((output || DIST) + LANG)); }
+function outputTemplates(output = null) { return () => gulp.src(TEMPLATES + GLOB).pipe(gulp.dest((output || DIST) + TEMPLATES)); }
+function outputStylesCSS(output = null) { return () => gulp.src(CSS + GLOB).pipe(gulp.dest((output || DIST) + CSS)); }
+function outputSounds(output = null) { return () => gulp.src(SOUNDS + GLOB).pipe(gulp.dest((output || DIST) + SOUNDS)); }
+function outputMetaFiles(output = null) { return () => gulp.src(['LICENSE', 'README.md', 'CHANGELOG.md']).pipe(gulp.dest((output || DIST))); }
 
 /**
  * Copy files to module named directory and then compress that folder into a zip
@@ -174,28 +94,89 @@ function compressDistribution() {
 	return gulp.series(
 		// Copy files to folder with module's name
 		() => gulp.src(DIST + GLOB)
-			.pipe(gulp.dest(DIST + `${MODULE_PACKAGE.name}/${MODULE_PACKAGE.name}`))
+			.pipe(gulp.dest(DIST + `${PACKAGE.name}/${PACKAGE.name}`))
 		// Compress the new folder into a ZIP and save it to the `bundle` folder
-		, () => gulp.src(DIST + MODULE_PACKAGE.name + '/' + GLOB)
-			.pipe(zip(MODULE_PACKAGE.name + '.zip'))
+		, () => gulp.src(DIST + PACKAGE.name + '/' + GLOB)
+			.pipe(zip(PACKAGE.name + '.zip'))
 			.pipe(gulp.dest(BUNDLE))
 		// Copy the module.json to the bundle directory
 		, () => gulp.src(DIST + 'module.json')
 			.pipe(gulp.dest(BUNDLE))
 		// Cleanup by deleting the intermediate module named folder
-		, pdel(DIST + MODULE_PACKAGE.name)
+		, pdel(DIST + PACKAGE.name)
 	);
 }
-exports.step_compressDistribution = compressDistribution();
 
 /**
- * Simple clean command
+ * Starts FoundryVTT locally in a docker container.
+ */
+function start() {
+	return async function start() {
+		return new Promise(async (resolve) => {
+			let { stdout, stderr } = await exec(`docker-compose up -d`);
+			console.log(stdout);
+			console.log(stderr);
+			resolve(true);
+		});
+	}
+}
+exports.start = start();
+
+/**
+ * Stops a locally running FoundryVTT container.
+ */
+function kill() {
+	return async function kill() {
+		return new Promise(async (resolve) => {
+			let { stdout, stderr } = await exec(`docker-compose down`);
+			console.log(stdout);
+			console.log(stderr);
+			resolve(true);
+		});
+	}
+}
+exports.kill = kill();
+
+/**
+ * Runs eslint. Fixes any automatically-fixable errors, and will fail if any errors are encountered (but not warnings)
+ */
+function lint() {
+	return function lint() {
+		return gulp.src(SOURCE + GLOB)
+			.pipe(eslint(".eslintrc"))
+			.pipe(eslint({ fix: true }))
+			.pipe(eslint.format())
+			.pipe(gulpIf(isFixed, gulp.dest(SOURCE)))
+			.pipe(eslint.failAfterError());
+	}
+	function isFixed(file) {
+		return file.eslint != null && file.eslint.fixed;
+	}
+}
+
+exports.lint = lint();
+/**
+ * Runs Tests via playwright. Builds up and tears down a fresh FoundryVTT container to run the tests on.
+ */
+function test() {
+	return async function test() {
+		start();
+		({ stdout, stderr } = await exec(`npx playwright test`));
+		console.log(stdout);
+		console.log(stderr);
+		kill();
+	}
+}
+exports.test = test();
+
+/**
+ * Simple clean command, cleans out DIST and BUNDLE folders.
  */
 exports.clean = pdel([DIST, BUNDLE]);
-exports.devClean = pdel([DEV_DIST()], {
-	"force": "true"
-});
 
+/**
+ * Cleans ALL content in the foundrydata folder.
+ */
 function cleanAll() {
 	return gulp.series(
 		pdel([process.env.LOCAL_DATA], {
@@ -207,6 +188,7 @@ function cleanAll() {
 	);
 }
 exports.cleanAll = cleanAll();
+
 /**
  * Default Build operation
  */
@@ -225,6 +207,7 @@ exports.default = gulp.series(
 		, outputMetaFiles()
 	)
 );
+
 /**
  * Extends the default build task by copying the result to the Development Environment
  */
@@ -241,6 +224,7 @@ exports.dev = gulp.series(
 		, outputMetaFiles(DEV_DIST())
 	)
 );
+
 /**
  * Performs a default build and then zips the result into a bundle
  */
@@ -266,13 +250,13 @@ exports.zip = gulp.series(
  */
 exports.watch = function () {
 	exports.default();
-	gulp.watch(MODULE_SOURCE + GLOB, gulp.series(pdel(DIST + SOURCE), buildSource(true, false)));
-	gulp.watch([MODULE_CSS + GLOB, MODULE + '/module.json', MODULE + '/package.json'], buildManifest());
-	gulp.watch(MODULE_LANG + GLOB, gulp.series(pdel(DIST + LANG), outputLanguages()));
-	gulp.watch(MODULE_TEMPLATES + GLOB, gulp.series(pdel(DIST + TEMPLATES), outputTemplates()));
-	gulp.watch(MODULE_CSS + GLOB, gulp.series(pdel(DIST + CSS), outputStylesCSS()));
-	gulp.watch(MODULE_SOUNDS + GLOB, gulp.series(pdel(DIST + SOUNDS), outputSounds()));
-	gulp.watch([MODULE + '/LICENSE', MODULE + '/README.md', MODULE + '/CHANGELOG.md'], outputMetaFiles());
+	gulp.watch(SOURCE + GLOB, gulp.series(pdel(DIST + SOURCE), buildSource(true, false)));
+	gulp.watch([CSS + GLOB, 'module.json', 'package.json'], buildManifest());
+	gulp.watch(LANG + GLOB, gulp.series(pdel(DIST + LANG), outputLanguages()));
+	gulp.watch(TEMPLATES + GLOB, gulp.series(pdel(DIST + TEMPLATES), outputTemplates()));
+	gulp.watch(CSS + GLOB, gulp.series(pdel(DIST + CSS), outputStylesCSS()));
+	gulp.watch(SOUNDS + GLOB, gulp.series(pdel(DIST + SOUNDS), outputSounds()));
+	gulp.watch(['LICENSE', 'README.md', 'CHANGELOG.md'], outputMetaFiles());
 }
 /**
  * Sets up a file watch on the project to detect any file changes and automatically rebuild those components, and then copy them to the Development Environment.
@@ -280,11 +264,11 @@ exports.watch = function () {
 exports.devWatch = function () {
 	const devDist = DEV_DIST();
 	exports.dev();
-	gulp.watch(MODULE_SOURCE + GLOB, gulp.series(plog('deleting: ' + devDist + SOURCE + GLOB), pdel(devDist + SOURCE + GLOB, { force: true }), buildSource(true, false, devDist), plog('sources done.')));
-	gulp.watch([MODULE_CSS + GLOB, MODULE + '/module.json', MODULE + '/package.json'], gulp.series(reloadPackage, buildManifest(devDist), plog('manifest done.')));
-	gulp.watch(MODULE_LANG + GLOB, gulp.series(pdel(devDist + LANG + GLOB, { force: true }), outputLanguages(devDist), plog('langs done.')));
-	gulp.watch(MODULE_TEMPLATES + GLOB, gulp.series(pdel(devDist + TEMPLATES + GLOB, { force: true }), outputTemplates(devDist), plog('templates done.')));
-	gulp.watch(MODULE_CSS + GLOB, gulp.series(pdel(devDist + CSS + GLOB, { force: true }), outputStylesCSS(devDist), plog('css done.')));
-	gulp.watch(MODULE_SOUNDS + GLOB, gulp.series(pdel(devDist + SOUNDS + GLOB, { force: true }), outputSounds(devDist), plog('sounds done.')));
-	gulp.watch([MODULE + '/LICENSE', MODULE + '/README.md', MODULE + '/CHANGELOG.md'], gulp.series(outputMetaFiles(devDist), plog('metas done.')));
+	gulp.watch(SOURCE + GLOB, gulp.series(plog('deleting: ' + devDist + SOURCE + GLOB), pdel(devDist + SOURCE + GLOB, { force: true }), buildSource(true, false, devDist), plog('sources done.')));
+	gulp.watch([CSS + GLOB, 'module.json', 'package.json'], gulp.series(reloadPackage, buildManifest(devDist), plog('manifest done.')));
+	gulp.watch(LANG + GLOB, gulp.series(pdel(devDist + LANG + GLOB, { force: true }), outputLanguages(devDist), plog('langs done.')));
+	gulp.watch(TEMPLATES + GLOB, gulp.series(pdel(devDist + TEMPLATES + GLOB, { force: true }), outputTemplates(devDist), plog('templates done.')));
+	gulp.watch(CSS + GLOB, gulp.series(pdel(devDist + CSS + GLOB, { force: true }), outputStylesCSS(devDist), plog('css done.')));
+	gulp.watch(SOUNDS + GLOB, gulp.series(pdel(devDist + SOUNDS + GLOB, { force: true }), outputSounds(devDist), plog('sounds done.')));
+	gulp.watch(['LICENSE', 'README.md', 'CHANGELOG.md'], gulp.series(outputMetaFiles(devDist), plog('metas done.')));
 }

@@ -5,25 +5,7 @@
   "description": "A set of tools for running campaigns in a 'Living World' format",
   "main": "src/index.ts",
   "scripts": {
-    "build": "npm run gulpBuild -- --module=mg-living-world-core",
-
-    "watchCore": "npm run devwatch -- --module=mg-living-world-core",
-    "watchDiscordIntegration": "npm run devwatch -- --module=discord-integration",
-    "watchReadyCheck": "npm run devwatch -- --module=mg-ready-check",
-    "watchBlockInitiative": "npm run devwatch -- --module=mg-block-initiative",
-    "testCore": "npm run test -- --module=mg-living-world-core",
-    "start": "npx gulp start",
-    "cleanAll": "npx gulp cleanAll",
-    "test": "npx gulp test",
-    "gulpBuild": "npx gulp",
-    "lint": "npx gulp lint",
-    "watch": "npx gulp watch",
-    "clean": "npx gulp clean",
-    "devbuild": "npx gulp dev",
-    "devwatch": "npx gulp devWatch",
-    "devclean": "npx gulp devClean",
-    "devtest": "npx gulp test",
-    "release": "npx gulp zip"
+    "build": "npx gulp"
   },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^9.255.3",
