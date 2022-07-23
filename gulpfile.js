@@ -12,10 +12,11 @@ const tabify = require('gulp-tabify');
 const stringify = require('json-stringify-pretty-compact');
 const eslint = require('gulp-eslint');
 const gulpIf = require('gulp-if');
-const {spawn, exec} = require('child_process');
+const { spawn, exec } = require('child_process');
 const cb = require('cb');
+require('dotenv').config();
 
-const MODULE = `${argv.module}`
+const MODULE = argv.module ? `${argv.module}` : '.';
 const GLOB = '**/*';
 const DIST = MODULE + '/dist/';
 const BUNDLE = MODULE + '/bundle/';
@@ -31,11 +32,11 @@ const SOUNDS = 'sounds/';
 const MODULE_SOUNDS = MODULE + '/' + SOUNDS;
 
 
-// JM: Probably no need to change
+// JM Probably no need to change
 var PACKAGE = JSON.parse(fs.readFileSync('package.json'));
-var MODULE_PACKAGE = JSON.parse(fs.readFileSync(MODULE +'/package.json'));
+var MODULE_PACKAGE = JSON.parse(fs.readFileSync(MODULE + '/package.json'));
 function reloadPackage(cb) { PACKAGE = JSON.parse(fs.readFileSync('package.json')); cb(); }
-function DEV_DIST() { return path.join(PACKAGE.devDir, MODULE_PACKAGE.name + '/'); }
+function DEV_DIST() { return path.join(process.env.LOCAL_DEV_DIR, MODULE_PACKAGE.name + '/'); }
 
 String.prototype.replaceAll = function (pattern, replace) { return this.split(pattern).join(replace); }
 function pdel(patterns, options) { return () => { return del(patterns, options); }; }
@@ -46,16 +47,33 @@ function isFixed(file) {
 }
 
 /**
+ * Starts FoundryVTT locally in a docker container.
+ */
+function start() {
+	return () => {
+		return new Promise(resolve => {
+			exec(`docker-compose up -d`, function (err, stdout, stderr) {
+				console.log(stdout);
+				console.log(stderr);
+				cb(err);
+				resolve(true);
+			});
+		});
+	}
+}
+exports.start = start();
+
+/**
  * Runs eslint
  */
 function lint() {
 	return () => {
 		return gulp.src(MODULE_SOURCE + GLOB)
 			.pipe(eslint(".eslintrc"))
-			.pipe(eslint({fix: true}))
+			.pipe(eslint({ fix: true }))
 			.pipe(eslint.format())
 			.pipe(gulpIf(isFixed, gulp.dest(MODULE_SOURCE)))
-			.pipe(eslint.failAfterError());	
+			.pipe(eslint.failAfterError());
 	}
 }
 exports.lint = lint();
@@ -67,16 +85,18 @@ exports.step_lint = lint();
 function test() {
 	return () => {
 		// spawn a process that starts up foundry
-		// TODO: Need to await it finishing startup, or to check for it later before executing tests.
-		const foundry = spawn('node', [ 'C:/Users/Jon/FoundryVTT-9.255/resources/app/main.js', 'C:/Users/Jon/foundryData'], { detached: true } );
+		const foundry = spawn('docker-compose', ['up'], { detached: true });
+		//const foundry = spawn('node', [ 'C:/Users/Jon/FoundryVTT-9.255/resources/app/main.js', 'C:/Users/Jon/foundryData'], { detached: true } );
 		return new Promise(resolve => {
-			exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {	
+			exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {
 				console.log(stdout);
 				console.log(stderr);
 				cb(err);
 				resolve(true);
 			});
-		}).then(() => foundry.kill());
+		}).then(() => {
+			foundry.kill()
+		});
 
 		/*
 		return exec(`npx playwright test --config ${MODULE}/test`, function (err, stdout, stderr) {	
@@ -173,13 +193,27 @@ exports.step_compressDistribution = compressDistribution();
  */
 exports.clean = pdel([DIST, BUNDLE]);
 exports.devClean = pdel([DEV_DIST()], {
-	"force" : "true"
+	"force": "true"
 });
+
+function cleanAll() {
+	return gulp.series(
+		pdel([process.env.LOCAL_DATA], {
+			"force": "true"
+		}),
+		() => gulp.src('*.*', { read: false })
+			.pipe(gulp.dest(process.env.LOCAL_DATA))
+
+	);
+}
+exports.cleanAll = cleanAll();
 /**
  * Default Build operation
  */
 exports.default = gulp.series(
-	lint(), 
+	lint(),
+	cleanAll(),
+	test(),
 	pdel([DIST])
 	, gulp.parallel(
 		buildSource(true, false)
@@ -212,6 +246,8 @@ exports.dev = gulp.series(
  */
 exports.zip = gulp.series(
 	lint(),
+	cleanAll(),
+	test(),
 	pdel([DIST])
 	, gulp.parallel(
 		buildSource(false, false)
@@ -250,5 +286,5 @@ exports.devWatch = function () {
 	gulp.watch(MODULE_TEMPLATES + GLOB, gulp.series(pdel(devDist + TEMPLATES + GLOB, { force: true }), outputTemplates(devDist), plog('templates done.')));
 	gulp.watch(MODULE_CSS + GLOB, gulp.series(pdel(devDist + CSS + GLOB, { force: true }), outputStylesCSS(devDist), plog('css done.')));
 	gulp.watch(MODULE_SOUNDS + GLOB, gulp.series(pdel(devDist + SOUNDS + GLOB, { force: true }), outputSounds(devDist), plog('sounds done.')));
-	gulp.watch([MODULE + '/LICENSE', MODULE +'/README.md', MODULE + '/CHANGELOG.md'], gulp.series(outputMetaFiles(devDist), plog('metas done.')));
+	gulp.watch([MODULE + '/LICENSE', MODULE + '/README.md', MODULE + '/CHANGELOG.md'], gulp.series(outputMetaFiles(devDist), plog('metas done.')));
 }
