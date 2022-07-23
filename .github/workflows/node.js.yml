@@ -28,6 +28,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-      working-directory: .
+    - run: echo "." >> $GITHUB_PATH
     - run: npm run build
-      working-directory: .
+
