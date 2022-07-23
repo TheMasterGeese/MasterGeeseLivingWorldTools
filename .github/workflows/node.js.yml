@@ -10,9 +10,10 @@ on:
     branches: [ "master" ]
 
 jobs:
+  
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     strategy:
       matrix:
@@ -27,4 +28,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: npm build
+    - run: echo "::set-env name=LOCAL_DEV_DIR::$GITHUB_WORKSPACE"
+    - run: npm run build
+
