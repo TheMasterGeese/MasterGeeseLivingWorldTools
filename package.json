@@ -5,7 +5,7 @@
   "description": "A set of tools for running campaigns in a 'Living World' format",
   "main": "src/index.ts",
   "scripts": {
-    "build": "npx run gulpBuild -- --module=mg-living-world-core",
+    "build": "npm run gulpBuild -- --module=mg-living-world-core",
 
     "watchCore": "npm run devwatch -- --module=mg-living-world-core",
     "watchDiscordIntegration": "npm run devwatch -- --module=discord-integration",
