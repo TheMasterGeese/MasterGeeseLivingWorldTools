@@ -28,8 +28,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: |
-        touch .env
-        echo path="." >> .env
+    - run: echo "::set-env name=LOCAL_DEV_DIR::$GITHUB_WORKSPACE"
     - run: npm run build
 
