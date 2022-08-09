@@ -28,7 +28,6 @@ const SOUNDS = 'sounds/';
 const DATA = "Data/";
 const WORLDS = 'worlds/';
 
-
 // declare variables and utility functions
 /**
  * The contents of package.json
@@ -54,6 +53,8 @@ function reloadPackage(callback) { PACKAGE = JSON.parse(fs.readFileSync('package
  * @returns The generated filepath.
  */
 function DEV_DIST() { return path.join(process.env.LOCAL_DEV_DIR, PACKAGE.name + '/'); }
+
+const DOCKER_CONTAINER = process.env.DOCKER_CONTAINER;
 /**
  * Wrapper for del to allow it to be considered a gulp task.
  * 
@@ -72,6 +73,89 @@ function pdel(patterns, options) { return () => { return del(patterns, options);
  * @returns The result of the callback function execution.
  */
 function plog(message) { return (cb) => { console.log(message); cb() }; }
+
+/**
+ * Compile the source code into the distribution directory
+ * @param {Boolean} keepSources Include the TypeScript SourceMaps
+ * @param {Boolean} minifySources Whether to minify the source files.
+ * @param {string} output Where to output the build results, defaults to the current working directory.
+ * 
+ * @returns ReadWriteStream for the build results.
+ */
+function buildSource(keepSources, minifySources = false, output = null) {
+	return () => {
+		var stream = gulp.src(SOURCE + GLOB);
+		if (keepSources) stream = stream.pipe(sm.init())
+		stream = stream.pipe(ts.createProject("tsconfig.json")())
+		if (keepSources) stream = stream.pipe(sm.write())
+		if (minifySources) stream = stream.pipe(minify({
+			ext: { min: '.js' },
+			mangle: false,
+			noSource: true
+		}));
+		else stream = stream.pipe(tabify(4, false));
+		return stream.pipe(gulp.dest((output || DIST) + SOURCE));
+	}
+}
+
+/**
+ * Builds the module manifest based on the package, sources, and css.
+ * 
+ * @param {string} output Where to output the build results, defaults to the current working directory.
+ * 
+ * @throws Error if no files are found in the src or css directories.
+ */
+function buildManifest(output = null) {
+	const files = []; // Collector for all the file paths
+	return (cb) => gulp.src(PACKAGE.main) // collect the source files
+		.pipe(rename({ extname: '.js' })) // rename their extensions to `.js`
+		.pipe(gulp.src(CSS + GLOB)) // grab all the CSS files
+		.on('data', file => files.push(path.relative(file.cwd, file.path))) // Collect all the file paths
+		.on('end', () => { // output the filepaths to the module.json
+			if (files.length == 0)
+				throw Error('No files found in ' + SOURCE + GLOB + " or " + CSS + GLOB);
+			const js = files.filter(e => e.endsWith('js')); // split the CSS and JS files
+			const css = files.filter(e => e.endsWith('css'));
+			fs.readFile('module.json', (err, data) => {
+				const module = data.toString() // Inject the data into the module.json
+					.replaceAll('{{name}}', PACKAGE.name)
+					.replaceAll('{{title}}', PACKAGE.title)
+					.replaceAll('{{version}}', PACKAGE.version)
+					.replaceAll('{{description}}', PACKAGE.description)
+					.replace('"{{sources}}"', stringify(js, null, '\t').replaceAll('\n', '\n\t').replaceAll('\\\\', '/'))
+					.replace('"{{css}}"', stringify(css, null, '\t').replaceAll('\n', '\n\t').replaceAll('\\\\', '/'));
+				fs.writeFile((output || DIST) + 'module.json', module, cb); // save the module to the distribution directory
+			});
+		});
+}
+
+// copies the corresponding files to the output location passed in, or the DIST folder if none is given.
+function outputLanguages(output = null) { return () => gulp.src(LANG + GLOB).pipe(gulp.dest((output || DIST) + LANG)); }
+function outputTemplates(output = null) { return () => gulp.src(TEMPLATES + GLOB).pipe(gulp.dest((output || DIST) + TEMPLATES)); }
+function outputStylesCSS(output = null) { return () => gulp.src(CSS + GLOB).pipe(gulp.dest((output || DIST) + CSS)); }
+function outputSounds(output = null) { return () => gulp.src(SOUNDS + GLOB).pipe(gulp.dest((output || DIST) + SOUNDS)); }
+function outputMetaFiles(output = null) { return () => gulp.src(['LICENSE', 'README.md', 'CHANGELOG.md']).pipe(gulp.dest((output || DIST))); }
+function outputTestWorld() { return () => gulp.src(WORLDS + GLOB).pipe(gulp.dest((process.env.LOCAL_DATA + "\\" + DATA + WORLDS))); }
+
+/**
+ * Copy files to module named directory and then compress that folder into a zip
+ */
+function compressDistribution() {
+	return gulp.series(
+		// Copy files to folder with module's name
+		() => gulp.src(DIST + GLOB)
+			.pipe(gulp.dest(DIST + `${PACKAGE.name}/${PACKAGE.name}`))
+		// Compress the new folder into a ZIP and save it to the `bundle` folder
+		, () => gulp.src(DIST + PACKAGE.name + '/' + GLOB)
+			.pipe(zip(PACKAGE.name + '.zip'))
+			.pipe(gulp.dest(BUNDLE))
+		// Copy the module.json to the bundle directory
+		, () => gulp.src(DIST + 'module.json')
+			.pipe(gulp.dest(BUNDLE))
+		// Cleanup by deleting the intermediate module named folder
+		, pdel(DIST + PACKAGE.name)
+	);
+}
 
 /**
  * Runs eslint. Fixes any automatically-fixable errors, and will fail if any errors are encountered (but not warnings)
@@ -99,127 +183,6 @@ function lint() {
 
 exports.lint = lint();
 
-/**
- * Compile the source code into the distribution directory
- * @param {Boolean} keepSources Include the TypeScript SourceMaps
- * @param {Boolean} minifySources Whether to minify the source files.
- * @param {string} output Where to output the build results, defaults to the current working directory.
- * 
- * @returns ReadWriteStream for the build results.
- */
-function buildSource(keepSources, minifySources = false, output = null) {
-	return function buildSource() {
-		var stream = gulp.src(SOURCE + GLOB);
-		if (keepSources) stream = stream.pipe(sm.init())
-		stream = stream.pipe(ts.createProject("tsconfig.json")())
-		if (keepSources) stream = stream.pipe(sm.write())
-		if (minifySources) stream = stream.pipe(minify({
-			ext: { min: '.js' },
-			mangle: false,
-			noSource: true
-		}));
-		else stream = stream.pipe(tabify(4, false));
-		return stream.pipe(gulp.dest((output || DIST) + SOURCE));
-	}
-}
-
-/**
- * Builds the module manifest based on the package, sources, and css.
- * 
- * @param {string} output Where to output the build results, defaults to the current working directory.
- * 
- * @throws Error if no files are found in the src or css directories.
- */
-function buildManifest(output = null) {
-	const files = []; // Collector for all the file paths
-	return function buildManifest(cb) {
-		gulp.src(PACKAGE.main) // collect the source files
-			.pipe(rename({ extname: '.js' })) // rename their extensions to `.js`
-			.pipe(gulp.src(CSS + GLOB)) // grab all the CSS files
-			.on('data', file => files.push(path.relative(file.cwd, file.path))) // Collect all the file paths
-			.on('end', () => { // output the filepaths to the module.json
-				if (files.length == 0)
-					throw Error('No files found in ' + SOURCE + GLOB + " or " + CSS + GLOB);
-				const js = files.filter(e => e.endsWith('js')); // split the CSS and JS files
-				const css = files.filter(e => e.endsWith('css'));
-				fs.readFile('module.json', (err, data) => {
-					const module = data.toString() // Inject the data into the module.json
-						.replaceAll('{{name}}', PACKAGE.name)
-						.replaceAll('{{title}}', PACKAGE.title)
-						.replaceAll('{{version}}', PACKAGE.version)
-						.replaceAll('{{description}}', PACKAGE.description)
-						.replace('"{{sources}}"', stringify(js, null, '\t').replaceAll('\n', '\n\t').replaceAll('\\\\', '/'))
-						.replace('"{{css}}"', stringify(css, null, '\t').replaceAll('\n', '\n\t').replaceAll('\\\\', '/'));
-					fs.writeFile((output || DIST) + 'module.json', module, cb); // save the module to the distribution directory
-				});
-			});
-	}
-}
-
-// copies the corresponding files to the output location passed in, or the DIST folder if none is given.
-function outputLanguages(output = null) {
-	return function outputLanguages() {
-		gulp.src(LANG + GLOB)
-			.pipe(gulp.dest((output || DIST) + LANG));
-	}
-}
-
-function outputTemplates(output = null) {
-	return function outputTemplates() {
-		gulp.src(TEMPLATES + GLOB)
-			.pipe(gulp.dest((output || DIST) + TEMPLATES));
-	}
-}
-
-function outputStylesCSS(output = null) {
-	return function outputStylesCSS() { 
-		gulp.src(CSS + GLOB)
-			.pipe(gulp.dest((output || DIST) + CSS)); 
-	}
-}
-
-function outputSounds(output = null) { 
-	return function outputSounds() {
-		gulp.src(SOUNDS + GLOB)
-			.pipe(gulp.dest((output || DIST) + SOUNDS)); 
-	}
-}
-
-function outputMetaFiles(output = null) { 
-	return function outputMetaFiles() {
-		gulp.src(['LICENSE', 'README.md', 'CHANGELOG.md'])
-			.pipe(gulp.dest((output || DIST)));
-	} 
-}
-
-/**
- * Builds the current code/configuration to the local dev environment.
- */
-function dev() {
-	return function dev() {
-		gulp.series(
-			pdel([DEV_DIST() + GLOB], { force: true })
-			, gulp.parallel(
-				buildSource(true, false, DEV_DIST())
-				, buildManifest(DEV_DIST())
-				, outputLanguages(DEV_DIST())
-				, outputTemplates(DEV_DIST())
-				, outputStylesCSS(DEV_DIST())
-				, outputSounds(DEV_DIST())
-				, outputMetaFiles(DEV_DIST())
-			)
-		);
-	}
-}
-exports.dev = dev();
-
-function outputTestWorld() {
-	return function outputTestWorld() {
-		gulp.src(WORLDS + GLOB)
-			.pipe(gulp.dest((process.env.LOCAL_DATA + "\\" + DATA + WORLDS)));
-	}
-}
-
 /*
  * Runs Tests via playwright. Builds up and tears down a fresh FoundryVTT container to run the tests on.
  */
@@ -232,7 +195,7 @@ function test() {
 		// Wait for the state of the docker container to be "healthy". Waiting for the container startup isn't enough, it takes 
 		// roughly 1 more minute after the container is started for FoundryVTT to be ready, indicated by the "healthy" status.
 		do {
-			({ stdout, stderr } = await exec('docker inspect --format="{{json .State.Health.Status}}" discord-integration-foundry-1'));
+			({ stdout, stderr } = await exec(`docker inspect --format="{{json .State.Health.Status}}" ${DOCKER_CONTAINER}`));
 		} while (stdout !== '"healthy"\n');
 		// run tests
 		({ stdout, stderr } = await exec(`npx playwright test`));
@@ -246,44 +209,25 @@ function test() {
 }
 exports.test = test();
 
+/**
+ * Simple clean command, cleans out DIST and BUNDLE folders.
+ */
+exports.clean = pdel([DIST, BUNDLE]);
 
 /**
- * Copy files to module named directory and then compress that folder into a zip
+ * Cleans ALL content in the foundrydata folder.
  */
-function compressDistribution() {
+function cleanAll() {
 	return gulp.series(
-		// Copy files to folder with module's name
-		() => gulp.src(DIST + GLOB)
-			.pipe(gulp.dest(DIST + `${PACKAGE.name}/${PACKAGE.name}`))
-		// Compress the new folder into a ZIP and save it to the `bundle` folder
-		, () => gulp.src(DIST + PACKAGE.name + '/' + GLOB)
-			.pipe(zip(PACKAGE.name + '.zip'))
-			.pipe(gulp.dest(BUNDLE))
-		// Copy the module.json to the bundle directory
-		, () => gulp.src(DIST + 'module.json')
-			.pipe(gulp.dest(BUNDLE))
-		// Cleanup by deleting the intermediate module named folder
-		, pdel(DIST + PACKAGE.name)
+		pdel([process.env.LOCAL_DATA], {
+			"force": "true"
+		}),
+		() => gulp.src('*.*', { read: false })
+			.pipe(gulp.dest(process.env.LOCAL_DATA))
+
 	);
 }
-
-function build() {
-	return gulp.series(
-		gulp.parallel(
-			buildSource(true, false)
-			, buildManifest()
-			, outputLanguages()
-			, outputTemplates()
-			, outputStylesCSS()
-			, outputSounds()
-			, outputMetaFiles()
-		)
-		, compressDistribution()
-		, pdel([DIST])
-	);
-}
-exports.build = build();
-
+exports.cleanAll = cleanAll();
 
 /**
  * Default Build operation.
@@ -292,31 +236,53 @@ exports.build = build();
  * 
  * Runs tests on the code, then performs all build functions to output the build results as a zip file.
  */
-function buildAll() {
-	return gulp.series(
-		lint()
-		, dev()
-		, outputTestWorld()
-		, test()
-		, build());
-}
+exports.default = gulp.series(
+	lint()
+	, dev()
+	, outputTestWorld()
+	, test()
+	, gulp.parallel(
+		buildSource(true, false)
+		, buildManifest()
+		, outputLanguages()
+		, outputTemplates()
+		, outputStylesCSS()
+		, outputSounds()
+		, outputMetaFiles()
+	)
+	, compressDistribution()
+	, pdel([DIST])
+);
 
-exports.default = buildAll();
+/**
+ * Builds the current code/configuration to the local dev environment.
+ */
+function dev() {
+	return gulp.series(
+		pdel([DEV_DIST() + GLOB], { force: true })
+		, gulp.parallel(
+			buildSource(true, false, DEV_DIST())
+			, buildManifest(DEV_DIST())
+			, outputLanguages(DEV_DIST())
+			, outputTemplates(DEV_DIST())
+			, outputStylesCSS(DEV_DIST())
+			, outputSounds(DEV_DIST())
+			, outputMetaFiles(DEV_DIST())
+		)
+	);
+}
 
 /**
  * Sets up a file watch on the project to detect any file changes and automatically rebuild those components, and then copy them to the Development Environment.
  */
-function watch() {
-	return function () {
-		const devDist = DEV_DIST();
-		exports.dev();
-		gulp.watch(SOURCE + GLOB, gulp.series(plog('deleting: ' + devDist + SOURCE + GLOB), pdel(devDist + SOURCE + GLOB, { force: true }), buildSource(true, false, devDist), plog('sources done.')));
-		gulp.watch([CSS + GLOB, 'module.json', 'package.json'], gulp.series(reloadPackage, buildManifest(devDist), plog('manifest done.')));
-		gulp.watch(LANG + GLOB, gulp.series(pdel(devDist + LANG + GLOB, { force: true }), outputLanguages(devDist), plog('langs done.')));
-		gulp.watch(TEMPLATES + GLOB, gulp.series(pdel(devDist + TEMPLATES + GLOB, { force: true }), outputTemplates(devDist), plog('templates done.')));
-		gulp.watch(CSS + GLOB, gulp.series(pdel(devDist + CSS + GLOB, { force: true }), outputStylesCSS(devDist), plog('css done.')));
-		gulp.watch(SOUNDS + GLOB, gulp.series(pdel(devDist + SOUNDS + GLOB, { force: true }), outputSounds(devDist), plog('sounds done.')));
-		gulp.watch(['LICENSE', 'README.md', 'CHANGELOG.md'], gulp.series(outputMetaFiles(devDist), plog('metas done.')));
-	}
+exports.watch = function () {
+	const devDist = DEV_DIST();
+	exports.dev();
+	gulp.watch(SOURCE + GLOB, gulp.series(plog('deleting: ' + devDist + SOURCE + GLOB), pdel(devDist + SOURCE + GLOB, { force: true }), buildSource(true, false, devDist), plog('sources done.')));
+	gulp.watch([CSS + GLOB, 'module.json', 'package.json'], gulp.series(reloadPackage, buildManifest(devDist), plog('manifest done.')));
+	gulp.watch(LANG + GLOB, gulp.series(pdel(devDist + LANG + GLOB, { force: true }), outputLanguages(devDist), plog('langs done.')));
+	gulp.watch(TEMPLATES + GLOB, gulp.series(pdel(devDist + TEMPLATES + GLOB, { force: true }), outputTemplates(devDist), plog('templates done.')));
+	gulp.watch(CSS + GLOB, gulp.series(pdel(devDist + CSS + GLOB, { force: true }), outputStylesCSS(devDist), plog('css done.')));
+	gulp.watch(SOUNDS + GLOB, gulp.series(pdel(devDist + SOUNDS + GLOB, { force: true }), outputSounds(devDist), plog('sounds done.')));
+	gulp.watch(['LICENSE', 'README.md', 'CHANGELOG.md'], gulp.series(outputMetaFiles(devDist), plog('metas done.')));
 }
-exports.watch = watch();

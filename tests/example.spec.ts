@@ -10,7 +10,7 @@ let gm_uid: string;
 /**
  * Element selectors
  */
- const SAMPLE_ELEMENT = '#client-settings > section > form';
+ const SAMPLE_ELEMENT = '#logo';
  
 /**
  * Expected Values
@@ -34,7 +34,7 @@ test.describe('sample-module', () => {
         await doSomething(page);
 
         // It's best practice to have at least one expect statement per test, to verify that the state of the app is as expected.
-        await expect(page.locator(SAMPLE_ELEMENT)).toHaveValue(EXPECTED_VALUE);
+        await expect(page.locator(SAMPLE_ELEMENT)).toHaveAttribute('src', EXPECTED_VALUE);
     });
 
     // Include any functions common to multiple "should" sections below all of them. Likewise if there are any functions common to all

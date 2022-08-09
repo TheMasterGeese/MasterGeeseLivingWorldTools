@@ -6,5 +6,5 @@
  */ 
  export class TestEnvironment {
     public static GM_DISCORD_ID = "Fill out with the testworld GM user's Discord ID."
-    public static EXPECTED_VALUE = "Fill out with an expected value.";
+    public static EXPECTED_VALUE = "icons/fvtt.png";
 }
