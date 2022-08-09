@@ -1,8 +1,6 @@
-# FoundryVTT Module Template
+# Master Geese's Living World Tools
 
-A TypeScript+Gulp template for a more automated FoundryVTT module development.
-
-In this system, you perform minimal changes to the `module.json` as it is populated automatically.
+This repository acts as both a template for new Living World modules and as a testing ground for new tools or improvements to the workflow of existing modules.
 
 ### Table of Contents
 
@@ -11,59 +9,31 @@ In this system, you perform minimal changes to the `module.json` as it is popula
 - [Project Files](#Project-Files)
 - [Module Manifest File](#Module-Manifest-File)
 - [NPM Package File](#NPM-Package-File)
-- [Gulp File and TS Config](#Gulp-File-and-TS-Config)
+- [Changelog](#Changelog)
+- [Contributing](#Contributing)
+- [License](#License)
 
 ## How to Use
 
-Clone the repository
-
-```
-HTTPS: git clone https://github.com/flamewave000/fvtt-module-template.git
-SSH: git clone git@github.com:flamewave000/fvtt-module-template.git
-GitHub CLI: gh repo clone flamewave000/fvtt-module-template
-```
-
-Install NodeJS if you don't already have it: [NodeJS](https://nodejs.org)
-
-Run the NPM installer inside the project directory
-
-```bash
-cd path/to/fvtt-module-template
-npm install
-```
-
-You can then move on to updating the `package.json` and `module.json` files with your Module's details. Once that is finished, below are the different commands you can run. They only operate when you are in the project's directory.
-
-Each of these commands are executed as follows:
-
-```bash
-# replace <command> with one of the commands described below
-npm run <command>
-# For example:
-npm run build
-```
-
-| Command             | Description                                                  |
-| ------------------- | ------------------------------------------------------------ |
-| `build`             | This is the basic Build command. It will compile the code and output everything into the `dist/` directory. This is a ready to use output of the module. |
-| `watch`     | This will run the Live Build process. This will monitor your project's files and whenever one of them changes, it will immediately process the changes output the new contents to the `dist/` directory. |
-| `clean`     | This will "Clean" the directory by removing the `dist/` and `bundle/` directories. |
-| `devbuild` | This is the same as the `build` command, except instead of outputting everything to the `dist/` folder, it will output the files to the `devDist` folder that is defined in the `package.json`. This will create the module's directory if it doesn't exists already, clear the contents of the directory, and then place the new project files in it. |
-| `devwatch` | This is the same as the `watch` command, but just like the `devbuild` command, it outputs the updated files to the `devDist` directory defined in the `package.json`. This is the recommended command to use while you are working on your module. It will take care of updating the module in FoundryVTT so all you have to do is switch to the app and hit `F5` to refresh the page. |
-| `devclean` | This will remove all the contents in the defined `devDist` folder. |
-| `release`   | Builds and compresses the project into a ZIP file and places it and a copy of the compiled `module.json` file in the `bundle/` directory. This is ready for being referenced by the FoundryVTT Module system for the community to install your module. |
-
-[top](#table-of-contents)
+First, perform the necessary steps to set up your development environment under [CONTRIBUTING](CONTRIBUTING.md). If you are setting up
+the development environment for a specific MG Living World module, that module's repository may have additional setup steps under its
+own CONTRIBUTING.md file.
 
 ## Folder Structure
 
 | Folder Name             | Description                                                  |
 | ----------------------- | ------------------------------------------------------------ |
-| `src/`                  | The directory containing all of your `.js` and `.ts` code files. |
-| `lang/`                 | The directory containing your localization strings files.    |
-| `dist/` (generated)     | This will contain the compiled source code, templates, project files, styles, and manifest. The contents can be directly copied to a FoundryVTT's modules directory, or zipped into a bundle for installing. |
+| `.github/workflows/`    | Contains .yml files used for streamlining build and release workflows on Github. |
+| `bundle/` (generated)   | Contains the final module.json and .zip files that are produced by your build.|
 | `css/` (optional)       | The directory containing any CSS you might have. This is an optional directory as not everyone is going to be editing HTML. If you exclude this, make sure to remove the `"styles": "{{css}}"` field from the `module.json` file. |
+| `dist/` (generated)     | This will contain the compiled source code, templates, project files, styles, and manifest generated during the build process. These will be exported to the bundle/ directory during the build process, and this folder will be cleared out as
+a result. |
+| `lang/`                 | The directory containing your localization strings files.    |
+| `node_modules/` (generated) | Contains all of your installed npm packages required for development or for the module itself. Is excluded from the Github repository. |
+| `src/`                  | The directory containing all of your `.js` and `.ts` code files. |
 | `templates/` (optional) | The directory containing your Handlebars HTML template files. This is an optional directory. |
+| `tests/`                  | The directory containing all of your test files. |
+| `worlds/`                  | The directory containing all of your worlds. Includes at least one world for testing purposes.|
 
 [top](#table-of-contents)
 
@@ -71,16 +41,38 @@ npm run build
 
 | File            | Description                                                  |
 | --------------- | ------------------------------------------------------------ |
+| `.github\workflows\*`| TODO |
+| `.env` (created)   | Contains all your environment variables, specific to your current dev environment. |
+| `.eslintrc `    | Configuration file for ESLint. |
 | `.gitignore`    | This is used to ignore files and folders you don't want to be included in the git repository. |
-| `CHANGELOG.md`  | A MarkDown file for describing the project's history of changes |
-| `gulpfile.js`   | Gulp File that contains the various build scripts used automating the module building, live building, and packaging. |
-| `LICENSE`       | UPDATE THIS FILE! The Copyright License for your project. GitHub has a very helpful page for [picking and appropriate license](https://choosealicense.com/) for your project. |
+| `CHANGELOG.md`  | A MarkDown file for describing the module's history of changes. |
+| `CONTRIBUTING.md` | A MarkDown file for describing how to contribute to this repository, as well as any guidance that applies to all
+MG Living World modules. |
+| `docker-compose.yml`  | Configuration for docker to download the appropriate docker image and build the container. |
+| `env-sample`  | Template for .env file to be renamed into .env when creating a new module or checking out this repository locally. |
+| `gulpfile.js`   | Gulp File that contains the various build scripts used automating the module linting, testing, development, building, and packaging. |
+| `LICENSE`       | The Copyright License for your module. MG Living World modules use the MIT license.|
 | `module.json`   | The FoundryVTT Module Manifest file that describes everything about your module. |
-| `package.json`  | The NPM Package configuration. This contains additional information that is used in the build automation process. |
+| `package.json`  | The NPM Package configuration. May contain additional build scripts. |
+| `playwright.config.ts`  | Configuration for Playwright to test your module. |
 | `README.md`     | MarkDown file you can use to describe what your module is and how to use it. |
 | `tsconfig.json` | TypeScript configuration. This defines the various settings used by the TypeScript transpiler. |
 
 [top](#table-of-contents)
+
+
+| Command             | Description                                                  |
+| ------------------- | ------------------------------------------------------------ |
+| `npx gulp`             | This is the basic Build command, it will execute all the steps below (except watch) in the order given. |
+| `npx gulp lint`     | Lints your code, looking for code format/style/best practice improvements that can be made and applying any fixes that can be done automatically. If there are any errors, the build process stops after this step finishes executing. Continues execution if there are no findings or all findings are only warnings. |
+| `npx gulp dev`     | Clears out the development directory, then build your module and copy it to your dev environment's modules/ folder. |
+| `npx gulp outputTesWorld` | Copies the contents of worlds/testWorld into your foundrydata/Data/worlds/ folder. |
+| `npx gulp test` | Spins up an instance of FoundryVTT in a docker container, then runs all tests against this container. When tests are complete, the container is removed. |
+| `npx gulp build` | Compiles and copies all your code and relevant config files into the dist/ directory, then packages the results into module.json and a .zip file with the modules name, copying the final product into bundle/ before clearing out the dist/ folder.|
+| `npx gulp watch` | Builds your module as the dev command does, but also keeps the process running, so that if any of the files that would be published via the dev command are changed, they will automatically be pushed to the corresponding dev directory.|
+
+[top](#table-of-contents)
+
 
 ## Module Manifest File
 
@@ -94,45 +86,16 @@ The module manifest does not contain too much that needs to be updated. There ar
 | `{{sources}}`   | The `"{{sources}}"` portions(including the quotes) will be replaced with a JSON array of all source files found in the `src/` directory.<br />*This is assembled at build time.* |
 | `{{css}}`       | The `"{{css}}"` portion (including the quotes) will be replaced with a JSON array of all styling files found in the `css/` directory.<br />*This is assembled at build time.* |
 
-The `module.json` file contains sections that will need to be updated. You can see a commented version below:
-
-```jsonc
-/* file: module.json */
-{
-	/* module package name, pulled from the package.json */
-	"name": "{{name}}",
-	/* module title, pulled from the package.json */
-	"title": "{{title}}",
-	/* module description, pulled from the package.json */
-	"description": "{{description}}",
-	/* module version, pulled from the package.json */
-	"version": "{{version}}",
-	/* Author's name, this should be updated to be your Name/UserName */
-	"author": "<<your name here>>",
-	/* The minimum version of FoundryVTT supported */
-	"minimumCoreVersion": "0.7.9",
-	/* The target version of FoundryVTT */
-	"compatibleCoreVersion": "0.7.9",
-	/* (DO NOT EDIT) The source files list. Generated by the build process */
-	"esmodules": "{{sources}}",
-	/* (DO NOT EDIT) The CSS files list. Generated by the build process.
-	 * If you do not have CSS, you will have to remove the line entirely. */
-	"styles": "{{css}}",
-	/* List of your module's supported languages and the file paths
-	 * to their definitions */
-	"languages": [
-		{ "lang": "en", "name": "English", "path": "lang/en.json" }
-	],
-	/* These are the standard Manifest URLs that need to be updated
-	 * for your project. Please refer to the official documentation. */
-	"url":		"https://path.url/to/project/{{name}}",
-	"license":	"https://path.url/to/project/{{name}}/LICENSE",
-	"manifest":	"https://path.url/to/project/{{name}}/bundle/module.json",
-	"download":	"https://path.url/to/project/{{name}}/bundle/{{name}}.zip",
-	"readme":	"https://path.url/to/project/{{name}}/README.md",
-	"changelog":"https://path.url/to/project/{{name}}/CHANGELOG.md"
-}
-```
+The `module.json` file contains sections that will need to be updated. These include:
+| Property Name   | Description                                                  |
+| --------------- | ------------------------------------------------------------ |
+| `author`        | Your name should go here. |
+| `url`           | As url. |
+| `license`       | As url. |
+| `manifest`      | As url. |
+| `download`      | As url. |
+| `readme`        | As url. |
+| `changelog`     | As url. |
 
 [top](#table-of-contents)
 
@@ -140,74 +103,25 @@ The `module.json` file contains sections that will need to be updated. You can s
 
 The NPM Package file is used by NPM to handle the project dependencies and to run the Gulp builder. There are a couple of things that need to be updated in this file for your new module.
 
-```jsonc
-{
-    /* Update this to your unique package name (no spaces!) */
-	"name": "module-package-name",
-    /* Update this with the displayed name */
-	"title": "My Awesome Module!",
-    /* This is the Semantic Version of you module */
-	"version": "1.0.0",
-    /* Main entry point into your module. Will be injecte into manifest */
-	"main": "src/index.ts",
-    /* You can also make it an array if you have more than one entry
-     * point that needs to run */
-    "main": ["src/index.ts", "src/other.ts"],
-    /* The short description FoundryVTT shows in the Module Managers */
-	"description": "Module description displayed in FoundryVTT Program",
-    /* This is the absolute path to your local FoundryVTT Data Folder's
-     * modules directory. This is used for the Live Dev Build process.
-     * Gulp will monitor changes to your project files and automatically
-     * build and deploy the module to this location. All you have to do
-     * is refresh the page and see your changes almost immediately! */
-	"devDir": "/path/to/FoundryVTT/Data/modules/",
-    /* (DO NOT EDIT), this is where the build commads are defined */
-	"scripts": {
-		"build": "npx gulp",
-		"start": "npx gulp watch",
-		"clean": "npx gulp clean",
-		"dev-build": "npx gulp dev",
-		"dev-start": "npx gulp devWatch",
-		"dev-clean": "npx gulp devClean",
-		"release": "npx gulp zip"
-	},
-    /* (DO NOT EDIT) These are the NPM dependencies used to build the project */
-	"devDependencies": {
-		"@league-of-foundry-developers/foundry-vtt-types": "^0.7.9-0",
-		"del": "^6.0.0",
-		"gulp": "^4.0.2",
-		"gulp-cli": "^2.3.0",
-		"gulp-minify": "^3.1.0",
-		"gulp-multi-dest": "^1.3.7",
-		"gulp-rename": "^2.0.0",
-		"gulp-sourcemaps": "^3.0.0",
-		"gulp-tabify": "0.0.2",
-		"gulp-typescript": "^6.0.0-alpha.1",
-		"gulp-zip": "^5.0.2",
-		"json-stringify-pretty-compact": "^3.0.0",
-		"typescript": "^4.1.3"
-	}
-}
-```
+| Property Name   | Description                                                  |
+| --------------- | ------------------------------------------------------------ |
+| `name`          | Update this to your unique package name (no spaces!) |
+| `title`         | Update this with the displayed name. |
+| `version`       | This is the [Semantic Version](https://semver.org/) of your module |
+| `main`          | Main entry point into your module. Will be injected into manifest. You can also make it an array if you have more
+than one entry point that needs to run. |
+| `description`   | The short description FoundryVTT shows in the Module Managers |
+| `scripts`(optional) | This is where npm scripts are defined. Does not include npx or docker scripts. Not all modules will have this 
+property. |
+| `dependencies` (optional)  | These are the NPM dependencies used to compile the project. |
+| `devDependencies`  | These are the NPM dependencies used to build the project. |
+
 
 [top](#table-of-contents)
 
-## Gulp File and TS Config
-
-Unless you know what you're doing, it's usually best to leave these be until you get more experience. But once you do, have fun!
-
-The `gulpfile.js` defines the build scripts that are executed by the NPM commands. These perform the TypeScript transpiling and everything else needed to build your module.
-
-The `tsconfig.json` file contains all the options used to configure the TypeScript transpiler. This file contains all of the options, and comments about what those options do. Don't be afraid to read through it and try out some of the options that interest you.
-
-[top](#table-of-contents)
-
-## JM
-
-TODO: This file needs an overhaul, but for now here's how things work now.
-All the linting/gulp tasks are done in this repo, under the assumption that all modules have been cloned in this project directory.
-Run each of the npm scripts like so to run them for a specific module:
-
-npm run lint -- --module=ready-check
-
-the "tag" script has not been attempted yet, and may or may not be broken.
+## Changelog
+See [CHANGELOG](CHANGELOG.md)
+## Contributing
+See [CONTRIBUTING](CONTRIBUTING.md)
+## License
+Distributed under the MIT License. See [LICENSE](LICENSE.md) for more information.
