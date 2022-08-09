@@ -13,6 +13,15 @@ jobs:
   
   build:
 
+    env: 
+      FOUNDRY_LOGIN: ${{ secrets.FOUNDRY_LOGIN }}
+      FOUNDRY_PASS: ${{ secrets.FOUNDRY_PASS }}
+      FOUNDRY_ADMIN: ${{ secrets.FOUNDRY_ADMIN }}
+      LOCAL_DATA: "./foundryData"
+      LOCAL_DEV_DIR: "./foundryData/Data/modules"
+      GM_DISCORD_ID: ${{ secrets.GM_DISCORD_ID }}
+      DOCKER_CONTAINER: "mastergeeselivingworldtools-foundry-1"
+      
     runs-on: windows-latest
 
     strategy:
@@ -27,6 +36,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+    - run: mkdir -p foundrydata/Data/modules
     - run: npm ci
     - run: npx gulp
 
