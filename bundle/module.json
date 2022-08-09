@@ -12,9 +12,10 @@
 		{ "lang": "en", "name": "English", "path": "lang/en.json" }
 	],
 	"url":		"https://github.com/TheMasterGeese/mg-living-world-tools",
-	"license":	"https://github.com/TheMasterGeese/mg-living-world-tools/LICENSE",
-	"manifest":	"https://github.com/TheMasterGeese/mg-living-world-tools/bundle/module.json",
-	"download":	"https://github.com/TheMasterGeese/mg-living-world-tools/bundle/mg-living-world-tools.zip",
-	"readme":	"https://github.com/TheMasterGeese/mg-living-world-tools/README.md",
-	"changelog":"https://github.com/TheMasterGeese/mg-living-world-tools/CHANGELOG.md"
+	"license":	"https://github.com/TheMasterGeese/mg-living-world-tools/blob/main/LICENSE",
+	"manifest":	"https://raw.githubusercontent.com/TheMasterGeese/mg-living-world-tools/main/bundle/module.json",
+	"download":	"https://raw.githubusercontent.com/TheMasterGeese/mg-living-world-tools/main/bundle/mg-living-world-tools.zip",
+	"readme":	"https://github.com/TheMasterGeese/mg-living-world-tools/blob/main/README.md",
+	"changelog":"https://github.com/TheMasterGeese/mg-living-world-tools/blob/main/CHANGELOG.md"
 }
+
