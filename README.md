@@ -70,6 +70,11 @@ MG Living World modules. |
 | `npx gulp test` | Spins up an instance of FoundryVTT in a docker container, then runs all tests against this container. When tests are complete, the container is removed. |
 | `npx gulp build` | Compiles and copies all your code and relevant config files into the dist/ directory, then packages the results into module.json and a .zip file with the modules name, copying the final product into bundle/ before clearing out the dist/ folder.|
 | `npx gulp watch` | Builds your module as the dev command does, but also keeps the process running, so that if any of the files that would be published via the dev command are changed, they will automatically be pushed to the corresponding dev directory.|
+| `npx playwright test` | Runs integration tests without setting up/tearing down the docker container first. Also shows test-by-test output in the terminal where the npx gulp test command does not.|
+| `docker-compose up -d` | Starts a docker container containing a running FoundryVTT server. If the image is not present on the local
+machine, or is out of date, the latest version will be downloaded before building it. |
+| `docker-compose down` | Stops and removes the currently-running FoundryVTT container. |
+| `npx eslint --fix ./src/**/*` | Runs eslint manually, without using gulp.
 
 [top](#table-of-contents)
 
