@@ -28,6 +28,5 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: echo "::set-env name=LOCAL_DEV_DIR::$GITHUB_WORKSPACE"
     - run: npx gulp
 
