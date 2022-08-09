@@ -4,9 +4,6 @@
   "version": "1.0.0",
   "description": "A set of tools for running campaigns in a 'Living World' format",
   "main": "src/index.ts",
-  "scripts": {
-    "build": "npx gulp"
-  },
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^9.255.3",
     "@playwright/test": "^1.24.0",
