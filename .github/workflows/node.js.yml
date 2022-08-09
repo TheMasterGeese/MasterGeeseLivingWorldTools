@@ -29,5 +29,5 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: echo "::set-env name=LOCAL_DEV_DIR::$GITHUB_WORKSPACE"
-    - run: npm run build
+    - run: npx gulp
 
