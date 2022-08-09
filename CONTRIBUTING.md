@@ -28,3 +28,12 @@
 * https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens
 * https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright
 
+
+## Releases
+
+Be sure to check off all the following items before releasing a new version:
+
+* Increment the version number in package.json and make sure it is incremented in bundle/module.json as well.
+* Update Changelog based on all the changes made.
+* 
+

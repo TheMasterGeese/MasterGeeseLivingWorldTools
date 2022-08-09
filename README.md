@@ -53,6 +53,7 @@ a result. |
 | `src/`                  | The directory containing all of your `.js` and `.ts` code files. |
 | `templates/` (optional) | The directory containing your Handlebars HTML template files. This is an optional directory. |
 | `tests/`                  | The directory containing all of your test files. |
+| `types/`                  | Contains types that cannot be downloaded via npm, such as the PF2E system's types. |
 | `worlds/`                  | The directory containing all of your worlds. Includes at least one world for testing purposes.|
 
 [top](#table-of-contents)
@@ -68,14 +69,20 @@ a result. |
 | `CHANGELOG.md`  | A MarkDown file for describing the module's history of changes. |
 | `CONTRIBUTING.md` | A MarkDown file for describing how to contribute to this repository, as well as any guidance that applies to all
 MG Living World modules. |
+| `css/samplecss.css` | Template for a css file to be included in a new module. |
 | `docker-compose.yml`  | Configuration for docker to download the appropriate docker image and build the container. |
 | `env-sample`  | Template for .env file to be renamed into .env when creating a new module or checking out this repository locally. |
 | `gulpfile.js`   | Gulp File that contains the various build scripts used automating the module linting, testing, development, building, and packaging. |
+| `lang/samplelang.json` | Template for an initial lang file in a new module. |
 | `LICENSE`       | The Copyright License for your module. MG Living World modules use the MIT license.|
 | `module.json`   | The FoundryVTT Module Manifest file that describes everything about your module. |
+| `package-lock.json`  | Tracks the exact version of each package installed. Is included in the repo, to ensure 100% reproduction of the environment across machines. |
 | `package.json`  | The NPM Package configuration. May contain additional build scripts. |
 | `playwright.config.ts`  | Configuration for Playwright to test your module. |
 | `README.md`     | MarkDown file you can use to describe what your module is and how to use it. |
+| `src/index.ts`  | Template for an initial typescript file in a new module. | 
+| `tests/example.spec.ts` | Template for Integration tests in a new module. |
+| `tests/TestEnvironmentSample.ts` | Template for TestEnvironment.ts file to be renamed into TestEnvironment.ts when creating a new module or checking out this repository locally. |
 | `tsconfig.json` | TypeScript configuration. This defines the various settings used by the TypeScript transpiler. |
 
 [top](#table-of-contents)
