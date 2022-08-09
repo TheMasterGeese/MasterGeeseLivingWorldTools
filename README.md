@@ -1,21 +1,23 @@
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/blob/master/LICENSE.md
+[version-shield]: https://img.shields.io/github/v/release/TheMasterGeese/Discord-Integration
+[version-url]: https://github.com/TheMasterGeese/Discord-Integration/releases/latest
+[forks-shield]: https://img.shields.io/github/forks/TheMasterGeese/Discord-Integration
+[forks-url]: https://github.com/TheMasterGeese/Discord-Integration/network/members
+[stars-shield]: https://img.shields.io/github/stars/TheMasterGeese/Discord-Integration
+[stars-url]: https://github.com/TheMasterGeese/Discord-Integration/stargazers
+[issues-shield]: https://img.shields.io/github/issues/TheMasterGeese/Discord-Integration
+[issues-url]: https://github.com/TheMasterGeese/Discord-Integration/issues
+[license-shield]: https://img.shields.io/github/license/TheMasterGeese/Discord-Integration
+[license-url]: https://github.com/TheMasterGeese/Discord-Integration/blob/master/LICENSE.md
+[last-updated-shield]: https://img.shields.io/github/last-commit/TheMasterGeese/Discord-Integration
 
 # Master Geese's Living World Tools
 
 This repository acts as both a template for new Living World modules and as a testing ground for new tools or improvements to the workflow of existing modules.
 
-[![Contributors][contributors-shield]][contributors-url]
+[![Version][version-shield]][version-url]
+![Last Updated][last-updated-shield]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
