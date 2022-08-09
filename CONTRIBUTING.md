@@ -35,5 +35,6 @@ Be sure to check off all the following items before releasing a new version:
 
 * Increment the version number in package.json and make sure it is incremented in bundle/module.json as well.
 * Update Changelog based on all the changes made.
-* 
+* Ensure all new code has been documented.
+* Ensure all issues for the milestone representing the new version have been completed.
 
