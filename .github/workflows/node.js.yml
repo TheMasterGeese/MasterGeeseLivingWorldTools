@@ -41,7 +41,7 @@ jobs:
         docker version -f '{{.Server.Experimental}}'
     - name: Docker
       run: |
-        echo $'{\n    "experimental": true \n}' | sudo tee /etc/docker/daemon.json
+        echo $'{\n    "experimental": true \n}' | tee /etc/docker/daemon.json
         sudo service docker restart
         docker version -f '{{.Server.Experimental}}'
     - run: mkdir -p foundrydata/Data/modules
