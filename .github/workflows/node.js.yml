@@ -31,8 +31,7 @@ jobs:
 
     steps:
     - name: Experimental Status
-      run: |
-          docker version -f '{{.Server.Experimental}}'
+      run: docker version -f '{{.Server.Experimental}}'
     - name: Docker
       run: |
           echo $'{\n    "experimental": true\n}' | sudo tee /etc/docker/daemon.json
