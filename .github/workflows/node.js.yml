@@ -20,7 +20,7 @@ jobs:
       LOCAL_DATA: "./foundryData"
       LOCAL_DEV_DIR: "./foundryData/Data/modules"
       GM_DISCORD_ID: ${{ secrets.GM_DISCORD_ID }}
-      DOCKER_CONTAINER: "mastergeeselivingworldtools-foundry-1"
+      DOCKER_CONTAINER: "mastergeeselivingworldtools_foundry_1"
       
     runs-on: ubuntu-latest
 
