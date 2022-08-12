@@ -22,7 +22,7 @@ jobs:
       GM_DISCORD_ID: ${{ secrets.GM_DISCORD_ID }}
       DOCKER_CONTAINER: "mastergeeselivingworldtools-foundry-1"
       
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
