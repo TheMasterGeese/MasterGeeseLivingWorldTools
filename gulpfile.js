@@ -188,25 +188,28 @@ exports.lint = lint();
  */
 function test() {
 	return async function test() {
-		// Startup docker container
-		let { stdout, stderr } = await exec(`docker-compose logs -f`);
-		console.log(stdout);
-		console.log(stderr);
-		// Wait for the state of the docker container to be "healthy". Waiting for the container startup isn't enough, it takes 
-		// roughly 1 more minute after the container is started for FoundryVTT to be ready, indicated by the "healthy" status.
-		/*
-		do {
-			({ stdout, stderr } = await exec(`docker inspect --format="{{json .State.Health.Status}}" ${DOCKER_CONTAINER}`));
-		} while (stdout !== '"healthy"\n');
+		if (!process.env.ci) {
+			// Startup docker container
+			let { stdout, stderr } = await exec(`docker-compose up -d`);
+			console.log(stdout);
+			console.log(stderr);
+			// Wait for the state of the docker container to be "healthy". Waiting for the container startup isn't enough, it takes 
+			// roughly 1 more minute after the container is started for FoundryVTT to be ready, indicated by the "healthy" status.
+			do {
+				({ stdout, stderr } = await exec(`docker inspect --format="{{json .State.Health.Status}}" ${DOCKER_CONTAINER}`));
+			} while (stdout !== '"healthy"\n');
+		}
 		// run tests
 		({ stdout, stderr } = await exec(`npx playwright test`));
 		console.log(stdout);
 		console.log(stderr);
-		// tear down docker container
-		({ stdout, stderr } = await exec(`docker-compose down`));
-		console.log(stdout);
-		console.log(stderr);
-		*/
+		if (!process.env.ci) {
+			// tear down docker container
+			({ stdout, stderr } = await exec(`docker-compose down`));
+			console.log(stdout);
+			console.log(stderr);
+		}
+		
 	}
 }
 exports.test = test();
@@ -243,7 +246,11 @@ exports.default = gulp.series(
 	, dev()
 	, outputTestWorld()
 	, test()
-	, gulp.parallel(
+	, bundle()
+);
+
+exports.bundle = gulp.series(
+	gulp.parallel(
 		buildSource(true, false)
 		, buildManifest()
 		, outputLanguages()
@@ -254,7 +261,12 @@ exports.default = gulp.series(
 	)
 	, compressDistribution()
 	, pdel([DIST])
-);
+)
+
+exports.copyData = gulp.series(
+	dev(),
+	outputTestWorld()
+)
 
 /**
  * Builds the current code/configuration to the local dev environment.
@@ -272,6 +284,22 @@ function dev() {
 			, outputMetaFiles(DEV_DIST())
 		)
 	);
+}
+
+function bundle() {
+	return gulp.series(
+		gulp.parallel(
+			buildSource(true, false)
+			, buildManifest()
+			, outputLanguages()
+			, outputTemplates()
+			, outputStylesCSS()
+			, outputSounds()
+			, outputMetaFiles()
+		)
+		, compressDistribution()
+		, pdel([DIST])
+	)
 }
 
 /**
