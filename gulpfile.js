@@ -219,6 +219,9 @@ function waitForDocker() {
 			console.log(stdout);
 			console.log(stderr);
 		} while (stdout !== '"healthy"\n');
+		({ stdout, stderr } = await exec(`docker logs -f ${DOCKER_CONTAINER}`));
+		console.log(stdout);
+		console.log(stderr);
 	}
 }
 exports.waitForDocker = waitForDocker();
