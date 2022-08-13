@@ -223,15 +223,6 @@ function waitForDocker() {
 }
 exports.waitForDocker = waitForDocker();
 
-function dockerStatus() {
-	return async function dockerStatus() {
-		({ stdout, stderr } = await exec(`echo ${process.env.FOUNDRY_LOGIN} ${process.env.FOUNDRY_PASS}`));
-		console.log(stdout);
-		console.log(stderr);
-	}
-}
-exports.dockerStatus = dockerStatus();
-
 /**
  * Simple clean command, cleans out DIST and BUNDLE folders.
  */
