@@ -223,6 +223,15 @@ function waitForDocker() {
 }
 exports.waitForDocker = waitForDocker();
 
+function dockerStatus() {
+	return async function dockerStatus() {
+		({ stdout, stderr } = await exec(`docker logs -f mastergeeselivingworldtools_foundry_1`));
+		console.log(stdout);
+		console.log(stderr);
+	}
+}
+exports.dockerStatus = dockerStatus();
+
 /**
  * Simple clean command, cleans out DIST and BUNDLE folders.
  */
