@@ -78,12 +78,12 @@ jobs:
         name: playwright-report
         path: test-results/example-sample-module-should-do-the-thing-chromium-retry1/video.webm
         retention-days: 30
+    - name: Output docker logs
+      if: always()
+      run: docker logs -f "mastergeeselivingworldtools_foundry_1"
     - name: Stop Docker
       if: always()
       run: docker-compose down
-    - name: Container Output
-      if: always()
-      run: npx gulp dockerStatus
     
   publish:
     timeout-minutes: 5
