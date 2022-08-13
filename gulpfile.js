@@ -195,9 +195,7 @@ function test() {
 			console.log(stderr);
 			// Wait for the state of the docker container to be "healthy". Waiting for the container startup isn't enough, it takes 
 			// roughly 1 more minute after the container is started for FoundryVTT to be ready, indicated by the "healthy" status.
-			do {
-				({ stdout, stderr } = await exec(`docker inspect --format="{{json .State.Health.Status}}" ${DOCKER_CONTAINER}`));
-			} while (stdout !== '"healthy"\n');
+			await waitForDocker();
 		}
 		// run tests
 		({ stdout, stderr } = await exec(`npx playwright test`));
@@ -213,6 +211,15 @@ function test() {
 	}
 }
 exports.test = test();
+
+async function waitForDocker() {
+	return async function waitForDocker() {
+		do {
+			({ stdout, stderr } = await exec(`docker inspect --format="{{json .State.Health.Status}}" ${DOCKER_CONTAINER}`));
+		} while (stdout !== '"healthy"\n');
+	}
+}
+exports.waitForDocker = waitForDocker();
 
 /**
  * Simple clean command, cleans out DIST and BUNDLE folders.
