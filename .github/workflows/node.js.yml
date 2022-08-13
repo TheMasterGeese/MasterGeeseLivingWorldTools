@@ -63,6 +63,7 @@ jobs:
     - name: Start Docker
       run: docker-compose up -d
     - name: Wait for Docker
+      continue-on-error: true
       run: npx gulp waitForDocker
     - name: Wait for Docker
       run: docker logs -f "mastergeeselivingworldtools_foundry_1"
