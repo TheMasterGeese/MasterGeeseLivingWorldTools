@@ -64,6 +64,8 @@ jobs:
       run: docker-compose up -d
     - name: Wait for Docker
       run: npx gulp waitForDocker
+    - name: Wait for Docker
+      run: docker log -f ${{ DOCKER_CONTAINER }}
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
