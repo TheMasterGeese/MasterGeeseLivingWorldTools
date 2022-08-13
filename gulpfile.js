@@ -219,12 +219,18 @@ function waitForDocker() {
 			console.log(stdout);
 			console.log(stderr);
 		} while (stdout !== '"healthy"\n');
+	}
+}
+exports.waitForDocker = waitForDocker();
+
+function dockerStatus() {
+	return async function dockerStatus() {
 		({ stdout, stderr } = await exec(`docker logs -f ${DOCKER_CONTAINER}`));
 		console.log(stdout);
 		console.log(stderr);
 	}
 }
-exports.waitForDocker = waitForDocker();
+exports.dockerStatus = dockerStatus();
 
 /**
  * Simple clean command, cleans out DIST and BUNDLE folders.
