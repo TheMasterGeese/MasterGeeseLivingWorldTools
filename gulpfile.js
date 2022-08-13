@@ -216,6 +216,8 @@ function waitForDocker() {
 	return async function waitForDocker() {
 		do {
 			({ stdout, stderr } = await exec(`docker inspect --format="{{json .State.Health.Status}}" ${DOCKER_CONTAINER}`));
+			console.log(stdout);
+			console.log(stderr);
 		} while (stdout !== '"healthy"\n');
 	}
 }
