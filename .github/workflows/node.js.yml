@@ -65,7 +65,8 @@ jobs:
     - name: Wait for Docker
       continue-on-error: true
       run: npx gulp waitForDocker
-    - name: Wait for Docker
+    - name: Output docker logs
+      if: always()
       run: docker logs -f "mastergeeselivingworldtools_foundry_1"
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
