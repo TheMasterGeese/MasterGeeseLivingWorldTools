@@ -66,6 +66,8 @@ jobs:
     - name: Wait for Docker
       continue-on-error: true
       run: npx gulp waitForDocker
+    - name: Container Output
+      run: npx gulp dockerStatus
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
