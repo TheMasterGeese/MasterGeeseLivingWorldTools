@@ -62,6 +62,8 @@ jobs:
       run: npx gulp copyData
     - name: Start Docker
       run: docker-compose up -d
+    - name: Wait for Docker
+      run: npx gulp waitForDocker
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
