@@ -12,6 +12,7 @@ env:
   FOUNDRY_LOGIN: ${{ secrets.FOUNDRY_LOGIN }}
   FOUNDRY_PASS: ${{ secrets.FOUNDRY_PASS }}
   FOUNDRY_ADMIN: ${{ secrets.FOUNDRY_ADMIN }}
+  FOUNDRY_WORLD: ${{ secrets.FOUNDRY_WORLD }}
   LOCAL_DATA: "./foundryData"
   LOCAL_DEV_DIR: "./foundryData/Data/modules"
   GM_DISCORD_ID: ${{ secrets.GM_DISCORD_ID }}
