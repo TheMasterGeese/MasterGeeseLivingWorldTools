@@ -66,8 +66,7 @@ jobs:
     - name: Wait for Docker
       continue-on-error: true
       run: npx gulp waitForDocker
-    - name: Container Output
-      run: npx gulp dockerStatus
+
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
@@ -80,7 +79,11 @@ jobs:
         path: test-results/example-sample-module-should-do-the-thing-chromium-retry1/video.webm
         retention-days: 30
     - name: Stop Docker
+      if: always()
       run: docker-compose down
+    - name: Container Output
+      if: always()
+      run: npx gulp dockerStatus
     
   publish:
     timeout-minutes: 5
