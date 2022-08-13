@@ -194,6 +194,7 @@ function test() {
 		console.log(stderr);
 		// Wait for the state of the docker container to be "healthy". Waiting for the container startup isn't enough, it takes 
 		// roughly 1 more minute after the container is started for FoundryVTT to be ready, indicated by the "healthy" status.
+		/*
 		do {
 			({ stdout, stderr } = await exec(`docker inspect --format="{{json .State.Health.Status}}" ${DOCKER_CONTAINER}`));
 		} while (stdout !== '"healthy"\n');
@@ -205,6 +206,7 @@ function test() {
 		({ stdout, stderr } = await exec(`docker-compose down`));
 		console.log(stdout);
 		console.log(stderr);
+		*/
 	}
 }
 exports.test = test();
