@@ -225,7 +225,7 @@ exports.waitForDocker = waitForDocker();
 
 function dockerStatus() {
 	return async function dockerStatus() {
-		({ stdout, stderr } = await exec(`docker logs -f mastergeeselivingworldtools_foundry_1`));
+		({ stdout, stderr } = await exec(`echo ${process.env.FOUNDRY_LOGIN} ${process.env.FOUNDRY_PASS}`));
 		console.log(stdout);
 		console.log(stderr);
 	}
