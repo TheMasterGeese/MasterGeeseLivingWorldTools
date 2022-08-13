@@ -8,43 +8,97 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-
+env: 
+  FOUNDRY_LOGIN: ${{ secrets.FOUNDRY_LOGIN }}
+  FOUNDRY_PASS: ${{ secrets.FOUNDRY_PASS }}
+  FOUNDRY_ADMIN: ${{ secrets.FOUNDRY_ADMIN }}
+  LOCAL_DATA: "./foundryData"
+  LOCAL_DEV_DIR: "./foundryData/Data/modules"
+  GM_DISCORD_ID: ${{ secrets.GM_DISCORD_ID }}
+  DOCKER_CONTAINER: "mastergeeselivingworldtools_foundry_1"
+  ci: true
+  
 jobs:
   
-  build:
-
-    env: 
-      FOUNDRY_LOGIN: ${{ secrets.FOUNDRY_LOGIN }}
-      FOUNDRY_PASS: ${{ secrets.FOUNDRY_PASS }}
-      FOUNDRY_ADMIN: ${{ secrets.FOUNDRY_ADMIN }}
-      LOCAL_DATA: "./foundryData"
-      LOCAL_DEV_DIR: "./foundryData/Data/modules"
-      GM_DISCORD_ID: ${{ secrets.GM_DISCORD_ID }}
-      DOCKER_CONTAINER: "mastergeeselivingworldtools_foundry_1"
-      
+  lint:
+    timeout-minutes: 5
     runs-on: ubuntu-latest
-
+    
     strategy:
       matrix:
         node-version: [12.x, 14.x, 16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
+      
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - name: Install Dependencies
+      run: npm ci
+    - name: ESLint
+      run: npx gulp lint
+      
+  test:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
+    - name: Install Dependencies
+      run: npm ci
+    - name: Copy Files
+      run: npx gulp copyData
+    - name: Start Docker
+      run: docker-compose up -d
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    - name: Run Playwright tests
+      run: npx playwright test
+    - name: Publish Test Results
+    - uses: actions/upload-artifact@v2
+      if: always()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
+    - name: Stop Docker
+      run: docker-compose down
+    
+  publish:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - name: Experimental Status
-      run: |
-        docker version -f '{{.Server.Experimental}}'
-    - name: Docker
-      run: |
-        echo $'{\n    "experimental": true \n}' | sudo tee /etc/docker/daemon.json
-        sudo service docker restart
-        docker version -f '{{.Server.Experimental}}'
-    - run: mkdir -p foundrydata/Data/modules
-    - run: npm ci
-    - run: npx gulp
+    - name: Install Dependencies
+      run: npm ci
+    - name: Publish Module
+      run: npx gulp bundle
+    
+        
+  
+    
+
 
