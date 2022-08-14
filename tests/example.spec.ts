@@ -52,11 +52,27 @@ test.describe('sample-module', () => {
         ]);
 
         // In theory these first two should be unnecessary, but are added as a precaution.
+        if (page.url() === 'http://localhost:30000/license') {
+            await page.locator('#eula-agree').setChecked(true);
+            await Promise.all([
+                page.locator('#sign').click(),
+                page.waitForLoadState('load')
+            ]);
+        }
+        // In theory these first two should be unnecessary, but are added as a precaution.
         if (page.url() === 'http://localhost:30000/auth') {
             await page.locator('#key').fill('atropos');
-            await page.locator('input[name="adminKey"]').press('Enter');
+            await Promise.all([
+                page.locator('input[name="adminKey"]').press('Enter'),
+                page.waitForLoadState('load')
+            ]);
         }
+
         if (page.url() === 'http://localhost:30000/setup') {
+            await Promise.all([
+                page.locator('#setup-configuration > nav > a[data-tab="worlds"]').click(),
+                page.waitForSelector('text=Launch World')
+            ]);
             await Promise.all([
                 page.locator('text=Launch World').click(),
                 page.waitForLoadState('load')
