@@ -27,6 +27,7 @@ const CSS = 'css/';
 const SOUNDS = 'sounds/';
 const DATA = "Data/";
 const WORLDS = 'worlds/';
+const SYSTEMS = 'systems/'
 
 // declare variables and utility functions
 /**
@@ -135,7 +136,8 @@ function outputTemplates(output = null) { return () => gulp.src(TEMPLATES + GLOB
 function outputStylesCSS(output = null) { return () => gulp.src(CSS + GLOB).pipe(gulp.dest((output || DIST) + CSS)); }
 function outputSounds(output = null) { return () => gulp.src(SOUNDS + GLOB).pipe(gulp.dest((output || DIST) + SOUNDS)); }
 function outputMetaFiles(output = null) { return () => gulp.src(['LICENSE', 'README.md', 'CHANGELOG.md']).pipe(gulp.dest((output || DIST))); }
-function outputTestWorld() { return () => gulp.src(WORLDS + GLOB).pipe(gulp.dest((process.env.LOCAL_DATA + "\\" + DATA + WORLDS))); }
+function outputWorlds() { return () => gulp.src(WORLDS + GLOB).pipe(gulp.dest((process.env.LOCAL_DATA + "\\" + DATA + WORLDS))); }
+function outputSystems() { return () => gulp.src(SYSTEMS + GLOB).pipe(gulp.dest((process.env.LOCAL_DATA + "\\" + DATA + SYSTEMS))); }
 
 /**
  * Copy files to module named directory and then compress that folder into a zip
@@ -183,34 +185,30 @@ function lint() {
 
 exports.lint = lint();
 
+function dockerUp() {
+	return async function dockerUp() {
+		// Startup docker container
+		let { stdout, stderr } = await exec(`docker-compose up -d`);
+		console.log(stdout);
+		console.log(stderr);
+		// Wait for the state of the docker container to be "healthy". Waiting for the container startup isn't enough, it takes 
+		// roughly 1 more minute after the container is started for FoundryVTT to be ready, indicated by the "healthy" status.
+		await waitForDocker();
+	}
+}
 /*
  * Runs Tests via playwright. Builds up and tears down a fresh FoundryVTT container to run the tests on.
  */
 function test() {
 	return async function test() {
-		if (!process.env.ci) {
-			// Startup docker container
-			let { stdout, stderr } = await exec(`docker-compose up -d`);
-			console.log(stdout);
-			console.log(stderr);
-			// Wait for the state of the docker container to be "healthy". Waiting for the container startup isn't enough, it takes 
-			// roughly 1 more minute after the container is started for FoundryVTT to be ready, indicated by the "healthy" status.
-			await waitForDocker();
-		}
 		// run tests
-		({ stdout, stderr } = await exec(`npx playwright test`));
+		let { stdout, stderr } = await exec(`npx playwright test`);
 		console.log(stdout);
 		console.log(stderr);
-		if (!process.env.ci) {
-			// tear down docker container
-			({ stdout, stderr } = await exec(`docker-compose down`));
-			console.log(stdout);
-			console.log(stderr);
-		}
-		
 	}
 }
 exports.test = test();
+
 
 function waitForDocker() {
 	return async function waitForDocker() {
@@ -231,6 +229,15 @@ function dockerStatus() {
 	}
 }
 exports.dockerStatus = dockerStatus();
+
+function dockerDown() {
+	return async function dockerStatus() {
+		let { stdout, stderr } = await exec(`docker-compose down`);
+		console.log(stdout);
+		console.log(stderr);
+	}
+}
+
 
 /**
  * Simple clean command, cleans out DIST and BUNDLE folders.
@@ -261,9 +268,10 @@ exports.cleanAll = cleanAll();
  */
 exports.default = gulp.series(
 	lint()
-	, dev()
-	, outputTestWorld()
+	, dockerUp()
+	, copyData()
 	, test()
+	, dockerDown()
 	, bundle()
 );
 
@@ -281,10 +289,14 @@ exports.bundle = gulp.series(
 	, pdel([DIST])
 )
 
-exports.copyData = gulp.series(
-	dev(),
-	outputTestWorld()
-)
+function copyData() {
+	return gulp.series(
+		dev(),
+		outputWorlds(),
+		outputSystems()
+	)
+}
+exports.copyData = copyData()
 
 /**
  * Builds the current code/configuration to the local dev environment.
