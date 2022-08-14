@@ -185,7 +185,7 @@ function lint() {
 
 exports.lint = lint();
 
-function dockerUp() {
+function test() {
 	return async function dockerUp() {
 		// Startup docker container
 		let { stdout, stderr } = await exec(`docker-compose up -d`);
@@ -193,33 +193,20 @@ function dockerUp() {
 		console.log(stderr);
 		// Wait for the state of the docker container to be "healthy". Waiting for the container startup isn't enough, it takes 
 		// roughly 1 more minute after the container is started for FoundryVTT to be ready, indicated by the "healthy" status.
-		await waitForDocker();
-	}
-}
-/*
- * Runs Tests via playwright. Builds up and tears down a fresh FoundryVTT container to run the tests on.
- */
-function test() {
-	return async function test() {
+		do {
+			({ stdout, stderr } = await exec(`docker inspect --format="{{json .State.Health.Status}}" ${DOCKER_CONTAINER}`));
+		} while (stdout !== '"healthy"\n');
 		// run tests
-		let { stdout, stderr } = await exec(`npx playwright test`);
+		({ stdout, stderr } = await exec(`npx playwright test`));
+		console.log(stdout);
+		console.log(stderr);
+		({ stdout, stderr } = await exec(`docker-compose down`));
 		console.log(stdout);
 		console.log(stderr);
 	}
 }
+
 exports.test = test();
-
-
-function waitForDocker() {
-	return async function waitForDocker() {
-		do {
-			({ stdout, stderr } = await exec(`docker inspect --format="{{json .State.Health.Status}}" ${DOCKER_CONTAINER}`));
-			console.log(stdout);
-			console.log(stderr);
-		} while (stdout !== '"healthy"\n');
-	}
-}
-exports.waitForDocker = waitForDocker();
 
 function dockerStatus() {
 	return async function dockerStatus() {
@@ -267,11 +254,10 @@ exports.cleanAll = cleanAll();
  * Runs tests on the code, then performs all build functions to output the build results as a zip file.
  */
 exports.default = gulp.series(
-	lint()
-	, dockerUp()
+	cleanAll()
+	, lint()
 	, copyData()
 	, test()
-	, dockerDown()
 	, bundle()
 );
 
@@ -293,7 +279,7 @@ function copyData() {
 	return gulp.series(
 		dev(),
 		outputWorlds(),
-		outputSystems()
+		// outputSystems()
 	)
 }
 exports.copyData = copyData()
