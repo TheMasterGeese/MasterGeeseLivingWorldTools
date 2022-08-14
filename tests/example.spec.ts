@@ -25,7 +25,7 @@ test.describe('sample-module', () => {
 
     test.beforeAll(async ({ browser }) => {
 
-        const context = browser.newContext();
+        const context = await browser.newContext();
         const page = await context.newPage();
         // reset the foundryData directory back to its base form, with only a single world with PF2E system running.
     
