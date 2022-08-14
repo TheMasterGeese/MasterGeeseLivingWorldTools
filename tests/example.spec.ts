@@ -57,7 +57,10 @@ test.describe('sample-module', () => {
             await page.locator('input[name="adminKey"]').press('Enter');
         }
         if (page.url() === 'http://localhost:30000/setup') {
-            await page.locator('text=Launch World').click();
+            await Promise.all([
+                page.locator('text=Launch World').click(),
+                page.waitForLoadState('load')
+            ]);
         }
 
         // Select the user to log in as
