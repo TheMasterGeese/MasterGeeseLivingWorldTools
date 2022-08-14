@@ -70,20 +70,23 @@ test.describe('sample-module', () => {
         }
 
         if (page.url() === 'http://localhost:30000/setup') {
-            await page.locator('#setup-configuration > nav > a[data-tab="systems"]').click(),
-            await Promise.all([
-                page.locator('#config-tabs > div.tab.active > footer > button.install-package').click(),
-                page.waitForSelector('#install-package > section.window-content > div > div.form-group, input[name="filter"]')
-            ]);
-            await page.locator('#install-package > section.window-content > div > div.form-group, input[name="filter"]').fill('pathfinder second edition'),
-            await Promise.all([
-                page.keyboard.press('Enter'),
-                page.waitForSelector('button[data-manifest="https://github.com/foundryvtt/pf2e/releases/download/latest/system.json"]')
-            ]);
-            await Promise.all([
-                page.locator('button[data-manifest="https://github.com/foundryvtt/pf2e/releases/download/latest/system.json"]').click(),
-                page.waitForSelector('#system-list > li[data-package-id="pf2e"]', {timeout : 120000})
-            ]);
+            await page.locator('#setup-configuration > nav > a[data-tab="systems"]').click();
+            const pf2eInstalled = await page.$('#system-list > li[data-package-id="pf2e"]');
+            if (!pf2eInstalled) {
+                await Promise.all([
+                    page.locator('#config-tabs > div.tab.active > footer > button.install-package').click(),
+                    page.waitForSelector('#install-package > section.window-content > div > div.form-group, input[name="filter"]')
+                ]);
+                await page.locator('#install-package > section.window-content > div > div.form-group, input[name="filter"]').fill('pathfinder second edition'),
+                    await Promise.all([
+                        page.keyboard.press('Enter'),
+                        page.waitForSelector('button[data-manifest="https://github.com/foundryvtt/pf2e/releases/download/latest/system.json"]')
+                    ]);
+                await Promise.all([
+                    page.locator('button[data-manifest="https://github.com/foundryvtt/pf2e/releases/download/latest/system.json"]').click(),
+                    page.waitForSelector('#system-list > li[data-package-id="pf2e"]', { timeout: 120000 })
+                ]);
+            }
             await Promise.all([
                 page.locator('#setup-configuration > nav > a[data-tab="worlds"]').click(),
                 page.waitForSelector('#world-list > li[data-package-id="testWorld"] > div.package-controls > button[data-action="launchWorld"]')
