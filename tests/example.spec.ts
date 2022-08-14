@@ -75,8 +75,9 @@ test.describe('sample-module', () => {
                 page.locator('#config-tabs > div.tab.active > footer > button.install-package').click(),
                 page.waitForSelector('#install-package > section.window-content > div > div.form-group, input[name="filter"]')
             ]);
+            await page.locator('#install-package > section.window-content > div > div.form-group, input[name="filter"]').fill('pathfinder second edition'),
             await Promise.all([
-                page.locator('#install-package > section.window-content > div > div.form-group, input[name="filter"]').fill('pathfinder second edition'),
+                page.keyboard.press('Enter'),
                 page.waitForSelector('button[data-manifest="https://github.com/foundryvtt/pf2e/releases/download/latest/system.json"]')
             ]);
             await Promise.all([
