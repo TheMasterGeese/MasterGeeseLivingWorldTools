@@ -70,8 +70,8 @@ test.describe('sample-module', () => {
         }
 
         if (page.url() === 'http://localhost:30000/setup') {
+            await page.locator('#setup-configuration > nav > a[data-tab="systems"]').click(),
             await Promise.all([
-                page.locator('#setup-configuration > nav > a[data-tab="systems"]').click(),
                 page.locator('#config-tabs > div.tab.active > footer > button.install-package').click(),
                 page.waitForSelector('#install-package > section.window-content > div > div.form-group, input[name="filter"]')
             ]);
