@@ -17,36 +17,35 @@ let gm_uid: string;
  */
 const EXPECTED_VALUE = TestEnvironment.EXPECTED_VALUE;
 
+test.beforeAll(async ({ browser }) => {
+
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    // reset the foundryData directory back to its base form, with only a single world with PF2E system running.
+
+    page.on('console', msg => {
+        if (msg.type() === 'error')
+            console.log(`Error text: "${msg.text()}"`);
+    });
+
+    await Promise.all([
+        page.goto('http://localhost:30000'),
+        page.waitForLoadState('load')
+    ]);
+    // In theory these first two should be unnecessary, but are added as a precaution.
+    if (page.url() === 'http://localhost:30000/auth') {
+        await page.locator('#key').fill('atropos');
+        await page.locator('input[name="adminKey"]').press('Enter');
+    }
+    if (page.url() === 'http://localhost:30000/setup') {
+        await page.locator('text=Launch World').click();
+    }
+})
 
 /**
  * All tests should be enclosed in a test.describe named after the module.
  */
 test.describe('sample-module', () => {
-
-    test.beforeAll(async ({ browser }) => {
-
-        const context = await browser.newContext();
-        const page = await context.newPage();
-        // reset the foundryData directory back to its base form, with only a single world with PF2E system running.
-    
-        page.on('console', msg => {
-            if (msg.type() === 'error')
-                console.log(`Error text: "${msg.text()}"`);
-        });
-    
-        await Promise.all([
-            page.goto('http://localhost:30000'),
-            page.waitForLoadState('load')
-        ]);
-        // In theory these first two should be unnecessary, but are added as a precaution.
-        if (page.url() === 'http://localhost:30000/auth') {
-            await page.locator('#key').fill('atropos');
-            await page.locator('input[name="adminKey"]').press('Enter');
-        }
-        if (page.url() === 'http://localhost:30000/setup') {
-            await page.locator('text=Launch World').click();
-        }
-    })
 
     // Tests should be formatted such that the hierarchy of tests reads as follows:
     // <module-name> should [NOT] <action description> when <condition> [and <other condition>].
