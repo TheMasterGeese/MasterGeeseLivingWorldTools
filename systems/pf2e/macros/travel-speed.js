@@ -1,1 +1,0 @@
-const tokens=canvas.tokens.controlled;0===tokens.length?ui.notifications.error("You must select at least one pc token"):game.pf2e.gm.launchTravelSheet(tokens.map((token=>token.actor)));
