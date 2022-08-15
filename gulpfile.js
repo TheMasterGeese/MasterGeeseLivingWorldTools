@@ -205,6 +205,9 @@ function test() {
 		({ stdout, stderr } = await exec(`docker-compose down`));
 		console.log(stdout);
 		console.log(stderr);
+		({ stdout, stderr } = await exec(`docker logs -f ${DOCKER_CONTAINER}`));
+		console.log(stdout);
+		console.log(stderr);
 	}
 }
 

@@ -13,8 +13,8 @@ env:
   FOUNDRY_PASS: ${{ secrets.FOUNDRY_PASS }}
   FOUNDRY_ADMIN: ${{ secrets.FOUNDRY_ADMIN }}
   FOUNDRY_WORLD: ${{ secrets.FOUNDRY_WORLD }}
-  LOCAL_DATA: "./foundryData"
-  LOCAL_DEV_DIR: "./foundryData/Data/modules"
+  LOCAL_DATA: "./foundrydata"
+  LOCAL_DEV_DIR: "./foundrydata/Data/modules"
   GM_DISCORD_ID: ${{ secrets.GM_DISCORD_ID }}
   DOCKER_CONTAINER: "mastergeeselivingworldtools_foundry_1"
   ci: true
