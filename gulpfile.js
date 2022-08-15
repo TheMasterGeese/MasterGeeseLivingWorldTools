@@ -27,7 +27,8 @@ const CSS = 'css/';
 const SOUNDS = 'sounds/';
 const DATA = "Data/";
 const WORLDS = 'worlds/';
-const SYSTEMS = 'systems/'
+const SYSTEMS = 'systems/';
+const FOUNDRY_DATA = 'foundrydata/';
 
 // declare variables and utility functions
 /**
@@ -136,8 +137,7 @@ function outputTemplates(output = null) { return () => gulp.src(TEMPLATES + GLOB
 function outputStylesCSS(output = null) { return () => gulp.src(CSS + GLOB).pipe(gulp.dest((output || DIST) + CSS)); }
 function outputSounds(output = null) { return () => gulp.src(SOUNDS + GLOB).pipe(gulp.dest((output || DIST) + SOUNDS)); }
 function outputMetaFiles(output = null) { return () => gulp.src(['LICENSE', 'README.md', 'CHANGELOG.md']).pipe(gulp.dest((output || DIST))); }
-function outputWorlds() { return () => gulp.src(WORLDS + GLOB).pipe(gulp.dest((process.env.LOCAL_DATA + "\\" + DATA + WORLDS))); }
-function outputSystems() { return () => gulp.src(SYSTEMS + GLOB).pipe(gulp.dest((process.env.LOCAL_DATA + "\\" + DATA + SYSTEMS))); }
+function outputWorlds() { return () => gulp.src(FOUNDRY_DATA + DATA + WORLDS + GLOB).pipe(gulp.dest((process.env.LOCAL_DATA + "\\" + DATA + WORLDS))); }
 
 /**
  * Copy files to module named directory and then compress that folder into a zip
