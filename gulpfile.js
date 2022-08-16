@@ -27,8 +27,6 @@ const CSS = 'css/';
 const SOUNDS = 'sounds/';
 const DATA = "Data/";
 const WORLDS = 'worlds/';
-const SYSTEMS = 'systems/';
-const FOUNDRY_DATA = 'foundrydata/';
 
 // declare variables and utility functions
 /**
@@ -137,7 +135,7 @@ function outputTemplates(output = null) { return () => gulp.src(TEMPLATES + GLOB
 function outputStylesCSS(output = null) { return () => gulp.src(CSS + GLOB).pipe(gulp.dest((output || DIST) + CSS)); }
 function outputSounds(output = null) { return () => gulp.src(SOUNDS + GLOB).pipe(gulp.dest((output || DIST) + SOUNDS)); }
 function outputMetaFiles(output = null) { return () => gulp.src(['LICENSE', 'README.md', 'CHANGELOG.md']).pipe(gulp.dest((output || DIST))); }
-function outputWorlds() { return () => gulp.src(FOUNDRY_DATA + DATA + WORLDS + GLOB).pipe(gulp.dest((process.env.LOCAL_DATA + "/" + DATA + WORLDS))); }
+function outputTestWorld() { return () => gulp.src(WORLDS + GLOB).pipe(gulp.dest((process.env.LOCAL_DATA + "\\" + DATA + WORLDS))); }
 
 /**
  * Copy files to module named directory and then compress that folder into a zip
@@ -185,8 +183,11 @@ function lint() {
 
 exports.lint = lint();
 
+/*
+ * Runs Tests via playwright. Builds up and tears down a fresh FoundryVTT container to run the tests on.
+ */
 function test() {
-	return async function dockerUp() {
+	return async function test() {
 		// Startup docker container
 		let { stdout, stderr } = await exec(`docker-compose up -d`);
 		console.log(stdout);
@@ -202,34 +203,13 @@ function test() {
 		({ stdout, stderr } = await exec(`npx playwright test`));
 		console.log(stdout);
 		console.log(stderr);
+		// tear down docker container
 		({ stdout, stderr } = await exec(`docker-compose down`));
 		console.log(stdout);
 		console.log(stderr);
-		({ stdout, stderr } = await exec(`docker logs -f ${DOCKER_CONTAINER}`));
-		console.log(stdout);
-		console.log(stderr);
 	}
 }
-
 exports.test = test();
-
-function dockerStatus() {
-	return async function dockerStatus() {
-		({ stdout, stderr } = await exec(`docker logs -f ${DOCKER_CONTAINER}`));
-		console.log(stdout);
-		console.log(stderr);
-	}
-}
-exports.dockerStatus = dockerStatus();
-
-function dockerDown() {
-	return async function dockerStatus() {
-		let { stdout, stderr } = await exec(`docker-compose down`);
-		console.log(stdout);
-		console.log(stderr);
-	}
-}
-
 
 /**
  * Simple clean command, cleans out DIST and BUNDLE folders.
@@ -259,15 +239,11 @@ exports.cleanAll = cleanAll();
  * Runs tests on the code, then performs all build functions to output the build results as a zip file.
  */
 exports.default = gulp.series(
-	cleanAll()
-	, lint()
-	, copyData()
+	lint()
+	, dev()
+	, outputTestWorld()
 	, test()
-	, bundle()
-);
-
-exports.bundle = gulp.series(
-	gulp.parallel(
+	, gulp.parallel(
 		buildSource(true, false)
 		, buildManifest()
 		, outputLanguages()
@@ -278,16 +254,7 @@ exports.bundle = gulp.series(
 	)
 	, compressDistribution()
 	, pdel([DIST])
-)
-
-function copyData() {
-	return gulp.series(
-		dev(),
-		outputWorlds(),
-		// outputSystems()
-	)
-}
-exports.copyData = copyData()
+);
 
 /**
  * Builds the current code/configuration to the local dev environment.
@@ -305,22 +272,6 @@ function dev() {
 			, outputMetaFiles(DEV_DIST())
 		)
 	);
-}
-
-function bundle() {
-	return gulp.series(
-		gulp.parallel(
-			buildSource(true, false)
-			, buildManifest()
-			, outputLanguages()
-			, outputTemplates()
-			, outputStylesCSS()
-			, outputSounds()
-			, outputMetaFiles()
-		)
-		, compressDistribution()
-		, pdel([DIST])
-	)
 }
 
 /**
