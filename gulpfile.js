@@ -9,7 +9,7 @@ const path = require('path');
 const rename = require('gulp-rename');
 const sm = require('gulp-sourcemaps');
 const stringify = require('json-stringify-pretty-compact');
-const tabify = require('gulp-tabify')
+// const tabify = require('gulp-tabify')
 const ts = require('gulp-typescript');
 const util = require('util');
 const zip = require('gulp-zip');
@@ -93,7 +93,7 @@ function buildSource(keepSources, minifySources = false, output = null) {
 			mangle: false,
 			noSource: true
 		}));
-		else stream = stream.pipe(tabify(4, false));
+		else // stream = stream.pipe(tabify(4, false));
 		return stream.pipe(gulp.dest((output || DIST) + SOURCE));
 	}
 }
