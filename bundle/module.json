@@ -4,8 +4,8 @@
 	"description": "A set of tools for running campaigns in a 'Living World' format",
 	"version": "1.0.0",
 	"author": "Khankar#2236",
-	"minimumCoreVersion": "0.9.0",
-	"compatibleCoreVersion": "0.9.0",
+	"minimumCoreVersion": "9",
+	"compatibleCoreVersion": "9",
 	"esmodules": ["src/index.js"],
 	"styles": ["css/samplecss.css"],
 	"languages": [
