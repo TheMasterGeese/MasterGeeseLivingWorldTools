@@ -9,7 +9,6 @@ const path = require('path');
 const rename = require('gulp-rename');
 const sm = require('gulp-sourcemaps');
 const stringify = require('json-stringify-pretty-compact');
-// const tabify = require('gulp-tabify')
 const ts = require('gulp-typescript');
 const util = require('util');
 const zip = require('gulp-zip');
@@ -196,8 +195,6 @@ function test() {
 		// roughly 1 more minute after the container is started for FoundryVTT to be ready, indicated by the "healthy" status.
 		do {
 			({ stdout, stderr } = await exec(`docker inspect --format="{{json .State.Health.Status}}" ${DOCKER_CONTAINER}`));
-			console.log(stdout);
-			console.log(stderr);
 		} while (stdout !== '"healthy"\n');
 		// run tests
 		({ stdout, stderr } = await exec(`npx playwright test`));

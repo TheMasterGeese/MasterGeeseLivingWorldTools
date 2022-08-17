@@ -1,5 +1,4 @@
 # Contributing
-
 ## Setup
 
 1. Install the following tools, if they are not already installed:
@@ -7,7 +6,6 @@
 * [Git](https://git-scm.com/downloads)
 * [Docker](https://docs.docker.com/engine/install/)
 * [Node.js](https://nodejs.org/en/download/)
-
 ### Optional (but recommended)
 * [Visual Studio Code](https://code.visualstudio.com/download)
 
@@ -27,8 +25,6 @@
 * https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-pull-request-github
 * https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens
 * https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright
-
-
 ## Releases
 
 Be sure to check off all the following items before releasing a new version:
