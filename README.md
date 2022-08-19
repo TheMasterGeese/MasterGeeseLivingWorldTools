@@ -1,16 +1,16 @@
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[version-shield]: https://img.shields.io/github/v/release/TheMasterGeese/Discord-Integration
-[version-url]: https://github.com/TheMasterGeese/Discord-Integration/releases/latest
-[forks-shield]: https://img.shields.io/github/forks/TheMasterGeese/Discord-Integration
-[forks-url]: https://github.com/TheMasterGeese/Discord-Integration/network/members
-[stars-shield]: https://img.shields.io/github/stars/TheMasterGeese/Discord-Integration
-[stars-url]: https://github.com/TheMasterGeese/Discord-Integration/stargazers
-[issues-shield]: https://img.shields.io/github/issues/TheMasterGeese/Discord-Integration
-[issues-url]: https://github.com/TheMasterGeese/Discord-Integration/issues
-[license-shield]: https://img.shields.io/github/license/TheMasterGeese/Discord-Integration
-[license-url]: https://github.com/TheMasterGeese/Discord-Integration/blob/master/LICENSE.md
-[last-updated-shield]: https://img.shields.io/github/last-commit/TheMasterGeese/Discord-Integration
+[version-shield]: https://img.shields.io/github/v/release/TheMasterGeese/MasterGeeseLivingWorldTools
+[version-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/releases/latest
+[forks-shield]: https://img.shields.io/github/forks/TheMasterGeese/MasterGeeseLivingWorldTools
+[forks-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/network/members
+[stars-shield]: https://img.shields.io/github/stars/TheMasterGeese/MasterGeeseLivingWorldTools
+[stars-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/stargazers
+[issues-shield]: https://img.shields.io/github/issues/TheMasterGeese/MasterGeeseLivingWorldTools
+[issues-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/issues
+[license-shield]: https://img.shields.io/github/license/TheMasterGeese/MasterGeeseLivingWorldTools
+[license-url]: https://github.com/TheMasterGeese/MasterGeeseLivingWorldTools/blob/master/LICENSE.md
+[last-updated-shield]: https://img.shields.io/github/last-commit/TheMasterGeese/MasterGeeseLivingWorldTools
 
 # Master Geese's Living World Tools
 
