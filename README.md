@@ -157,3 +157,4 @@ See [CHANGELOG](CHANGELOG.md)
 See [CONTRIBUTING](CONTRIBUTING.md)
 ## License
 Distributed under the MIT License. See [LICENSE](LICENSE.md) for more information.
+Note that any modules released should also reference the [Foundry Virtual Tabletop EULA - Limited License Agreement for Module Development](https://foundryvtt.com/article/license/), however this does not need to be included in the repo as its own license file.
