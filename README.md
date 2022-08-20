@@ -31,7 +31,7 @@ The following modules have been created for use as part of the toolset:
 - [Core](https://github.com/TheMasterGeese/mg-living-world-core): Contains any common functionalities that do not belong in separate modules.
 
 Based on [Dragon Flagon TS Automated Module template](https://github.com/flamewave000/fvtt-module-template) by flamewave000.
-### Table of Contents
+# Table of Contents
 
 - [How to Use](#How-to-Use)
 - [Folder Structure](#Folder-Structure)
@@ -55,10 +55,10 @@ own CONTRIBUTING.md file.
 | `bundle/`               | Contains the final module.json and .zip files that are produced by your build. |
 | `css/` (optional)       | The directory containing any CSS you might have. This is an optional directory as not every module is going to be editing HTML. If you exclude this, make sure to remove the `"styles": "{{css}}"` field from the `module.json` file. |
 | `dist/` (generated)     | This will contain the compiled source code, templates, project files, styles, and manifest generated during the build process. These will be exported to the bundle/ directory during the build process, and this folder will be cleared out as a result. |
+| `handlebars/` (optional) | The directory containing your Handlebars HTML template files. This is an optional directory. This is an optional directory as not every module is going to be editing HTML. |
 | `lang/`                 | The directory containing your localization strings files.    |
 | `node_modules/` (generated) | Contains all of your installed npm packages required for development or for the module itself. Is excluded from the Github repository. |
 | `src/`                  | The directory containing all of your `.js` and `.ts` code files. |
-| `templates/` (optional) | The directory containing your Handlebars HTML template files. This is an optional directory. This is an optional directory as not every module is going to be editing HTML. |
 | `tests/`                | The directory containing all of your test files. |
 | `types/`                | Contains types that cannot be downloaded via npm, such as the PF2E system's types. |
 | `worlds/`               | The directory containing all of your worlds. Includes at least one world for testing purposes.|

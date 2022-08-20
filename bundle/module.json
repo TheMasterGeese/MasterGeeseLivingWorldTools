@@ -2,7 +2,7 @@
 	"name": "mg-living-world-tools",
 	"title": "Master Geese's Living World Tools",
 	"description": "A set of tools for running campaigns in a 'Living World' format",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"author": "Khankar#2236",
 	"minimumCoreVersion": "9",
 	"compatibleCoreVersion": "9",

@@ -1,7 +1,7 @@
 {
   "name": "mg-living-world-tools",
   "title": "Master Geese's Living World Tools",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A set of tools for running campaigns in a 'Living World' format",
   "main": "src/index.ts",
   "devDependencies": {
