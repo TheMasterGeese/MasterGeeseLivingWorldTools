@@ -27,7 +27,7 @@ The following modules have been created for use as part of the toolset:
 
 - [Discord Integration](https://github.com/TheMasterGeese/Discord-Integration): Facilitates communcation between FoundryVTT and discord servers, including exposing an event hook for other modules to send messages to Discord.
 - [Ready Check](https://github.com/TheMasterGeese/mg-ready-check): Allows GMs and other modules to trigger ready checks for players to signal whether or not they are ready to continue.
-- [Block Initiative](https://github.com/TheMasterGeese/mg-block-initiative): Overhauls the combat tab to use an initiative system that sorts combatants into Player blocks and Enemy blocks, in the interest of supporting simultaneous asynchronous turns in combat.
+- [Block Initiative (in development)](https://github.com/TheMasterGeese/mg-block-initiative): Overhauls the combat tab to use an initiative system that sorts combatants into Player blocks and Enemy blocks, in the interest of supporting simultaneous asynchronous turns in combat.
 - [Core](https://github.com/TheMasterGeese/mg-living-world-core): Contains any common functionalities that do not belong in separate modules.
 
 Based on [Dragon Flagon TS Automated Module template](https://github.com/flamewave000/fvtt-module-template) by flamewave000.
