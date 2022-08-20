@@ -9,7 +9,6 @@ const path = require('path');
 const rename = require('gulp-rename');
 const sm = require('gulp-sourcemaps');
 const stringify = require('json-stringify-pretty-compact');
-const tabify = require('gulp-tabify')
 const ts = require('gulp-typescript');
 const util = require('util');
 const zip = require('gulp-zip');
@@ -93,7 +92,6 @@ function buildSource(keepSources, minifySources = false, output = null) {
 			mangle: false,
 			noSource: true
 		}));
-		else stream = stream.pipe(tabify(4, false));
 		return stream.pipe(gulp.dest((output || DIST) + SOURCE));
 	}
 }
@@ -196,8 +194,6 @@ function test() {
 		// roughly 1 more minute after the container is started for FoundryVTT to be ready, indicated by the "healthy" status.
 		do {
 			({ stdout, stderr } = await exec(`docker inspect --format="{{json .State.Health.Status}}" ${DOCKER_CONTAINER}`));
-			console.log(stdout);
-			console.log(stderr);
 		} while (stdout !== '"healthy"\n');
 		// run tests
 		({ stdout, stderr } = await exec(`npx playwright test`));
@@ -273,13 +269,12 @@ function dev() {
 		)
 	);
 }
-
+exports.dev = dev();
 /**
  * Sets up a file watch on the project to detect any file changes and automatically rebuild those components, and then copy them to the Development Environment.
  */
 exports.watch = function () {
 	const devDist = DEV_DIST();
-	exports.dev();
 	gulp.watch(SOURCE + GLOB, gulp.series(plog('deleting: ' + devDist + SOURCE + GLOB), pdel(devDist + SOURCE + GLOB, { force: true }), buildSource(true, false, devDist), plog('sources done.')));
 	gulp.watch([CSS + GLOB, 'module.json', 'package.json'], gulp.series(reloadPackage, buildManifest(devDist), plog('manifest done.')));
 	gulp.watch(LANG + GLOB, gulp.series(pdel(devDist + LANG + GLOB, { force: true }), outputLanguages(devDist), plog('langs done.')));

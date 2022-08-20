@@ -1,13 +1,12 @@
-# My Module
+# MasterGeeseLivingWorldTools
 
-## Release 1.0.1 (yyyy-dd-mm)
-- A simple list
-- Of changes
+## 1.0.0
+I- Initial Release
 
-## Release 1.0.0 (yyyy-dd-mm)
-- A simple list
-- Of changes
-
-## Pre-Release 0.1.0 (yyyy-dd-mm)
-- A simple list
-- Of changes
+## 1.0.1
+- Fixed shields on README pointing to the wrong repository.
+- Added listing of modules that are part of the MG Living World pack to README.
+- Added sample handlebars folder and file.
+- Added descriptions of fields to fill out in module.json to README.
+- Fixed minimum core version being incorrect (even though this is not a module meant to be installed, other modules will use this as a template.)
+- Removed dangling reference to gulp-tabify 
