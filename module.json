@@ -3,9 +3,17 @@
 	"title": "{{title}}",
 	"description": "{{description}}",
 	"version": "{{version}}",
-	"author": "Khankar#2236",
-	"minimumCoreVersion": "9",
-	"compatibleCoreVersion": "9",
+	"authors": [
+		{
+			"name": "MasterGeese",
+			"email": "themastergeese@gmail.com",
+			"discord": "Khankar#2236"
+		}
+	],
+	"compatibility": {
+		"minimum": 10,
+		"verified": "10.291"
+	},
 	"esmodules": "{{sources}}",
 	"styles": "{{css}}",
 	"languages": [
